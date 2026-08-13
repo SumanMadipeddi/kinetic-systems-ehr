@@ -3,10 +3,11 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { usePracticeStore } from "@/store/practice-store";
+import { DEFAULT_PRACTICE, usePracticeStore } from "@/store/practice-store";
 import { useUiStore } from "@/store/ui-store";
 import {
   practiceInfoSchema,
@@ -32,47 +33,50 @@ const TIME_ZONES = [
 export function PracticeInfoForm() {
   const router = useRouter();
   const practice = usePracticeStore((s) => s.practice);
+  const hasHydrated = usePracticeStore((s) => s.hasHydrated);
   const savePractice = usePracticeStore((s) => s.savePractice);
   const showToast = useUiStore((s) => s.showToast);
   const openPracticeInfoTab = useUiStore((s) => s.openPracticeInfoTab);
 
   const form = useForm<PracticeInfoFormValues>({
-    defaultValues: practice,
+    resolver: zodResolver(practiceInfoSchema),
+    defaultValues: practice ?? DEFAULT_PRACTICE,
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
+
+  const { reset, handleSubmit, register, formState } = form;
 
   useEffect(() => {
     openPracticeInfoTab();
   }, [openPracticeInfoTab]);
 
+  // Wait for localStorage rehydration, then load persisted values into the form
   useEffect(() => {
-    form.reset(practice);
-  }, [practice, form]);
+    if (!hasHydrated) return;
+    reset({
+      practiceName: practice.practiceName ?? "",
+      practicePhone: practice.practicePhone ?? "",
+      practiceFax: practice.practiceFax ?? "",
+      facilityName: practice.facilityName ?? "",
+      addressLine1: practice.addressLine1 ?? "",
+      addressLine2: practice.addressLine2 ?? "",
+      city: practice.city ?? "",
+      state: practice.state ?? "CA",
+      zip: practice.zip ?? "",
+      country: practice.country ?? "United States",
+      timeZone: practice.timeZone ?? "America/Los_Angeles",
+      observesDaylightSaving: Boolean(practice.observesDaylightSaving),
+    });
+  }, [hasHydrated, practice, reset]);
 
   const onCancel = () => {
-    form.reset(practice);
+    reset(practice);
     router.push("/home");
   };
 
-  const onSave = () => {
-    const raw = form.getValues();
-    const parsed = practiceInfoSchema.safeParse({
-      ...raw,
-      practiceFax: raw.practiceFax ?? "",
-      addressLine2: raw.addressLine2 ?? "",
-      observesDaylightSaving: Boolean(raw.observesDaylightSaving),
-    });
-
-    if (!parsed.success) {
-      const fieldErrors = parsed.error.flatten().fieldErrors;
-      (Object.keys(fieldErrors) as (keyof PracticeInfoFormValues)[]).forEach((key) => {
-        const message = fieldErrors[key]?.[0];
-        if (message) form.setError(key, { message });
-      });
-      showToast(parsed.error.issues[0]?.message ?? "Please complete required fields.", "error");
-      return;
-    }
-
-    savePractice(parsed.data);
+  const onSubmit = (data: PracticeInfoFormValues) => {
+    savePractice(data);
     showToast("Practice information saved.", "success");
     router.push("/home");
   };
@@ -91,9 +95,9 @@ export function PracticeInfoForm() {
             Cancel
           </Button>
           <Button
-            type="button"
+            type="submit"
+            form="practice-info-form"
             variant="orange"
-            onClick={onSave}
             data-testid="practice-save"
           >
             Save
@@ -102,18 +106,17 @@ export function PracticeInfoForm() {
       </div>
 
       <form
+        id="practice-info-form"
         className="mx-auto w-full max-w-[720px] space-y-3 p-6"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSave();
-        }}
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
       >
         <Input
           id="practiceName"
           label="Practice name"
           requiredMark
-          error={form.formState.errors.practiceName?.message}
-          {...form.register("practiceName")}
+          error={formState.errors.practiceName?.message}
+          {...register("practiceName")}
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -121,14 +124,14 @@ export function PracticeInfoForm() {
             id="practicePhone"
             label="Practice phone"
             requiredMark
-            error={form.formState.errors.practicePhone?.message}
-            {...form.register("practicePhone")}
+            error={formState.errors.practicePhone?.message}
+            {...register("practicePhone")}
           />
           <Input
             id="practiceFax"
             label="Practice fax"
-            error={form.formState.errors.practiceFax?.message}
-            {...form.register("practiceFax")}
+            error={formState.errors.practiceFax?.message}
+            {...register("practiceFax")}
           />
         </div>
 
@@ -136,30 +139,30 @@ export function PracticeInfoForm() {
           id="facilityName"
           label="Facility name"
           requiredMark
-          error={form.formState.errors.facilityName?.message}
-          {...form.register("facilityName")}
+          error={formState.errors.facilityName?.message}
+          {...register("facilityName")}
         />
 
         <Input
           id="addressLine1"
           label="Address line 1"
           requiredMark
-          error={form.formState.errors.addressLine1?.message}
-          {...form.register("addressLine1")}
+          error={formState.errors.addressLine1?.message}
+          {...register("addressLine1")}
         />
 
         <Input
           id="addressLine2"
           label="Address line 2"
-          {...form.register("addressLine2")}
+          {...register("addressLine2")}
         />
 
         <Input
           id="city"
           label="City"
           requiredMark
-          error={form.formState.errors.city?.message}
-          {...form.register("city")}
+          error={formState.errors.city?.message}
+          {...register("city")}
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -168,15 +171,15 @@ export function PracticeInfoForm() {
             label="State"
             requiredMark
             options={US_STATES}
-            error={form.formState.errors.state?.message}
-            {...form.register("state")}
+            error={formState.errors.state?.message}
+            {...register("state")}
           />
           <Input
             id="zip"
             label="Zip"
             requiredMark
-            error={form.formState.errors.zip?.message}
-            {...form.register("zip")}
+            error={formState.errors.zip?.message}
+            {...register("zip")}
           />
         </div>
 
@@ -188,8 +191,8 @@ export function PracticeInfoForm() {
             { value: "United States", label: "United States" },
             { value: "Canada", label: "Canada" },
           ]}
-          error={form.formState.errors.country?.message}
-          {...form.register("country")}
+          error={formState.errors.country?.message}
+          {...register("country")}
         />
 
         <div className="grid grid-cols-[1fr_auto] items-end gap-4">
@@ -198,11 +201,11 @@ export function PracticeInfoForm() {
             label="Time zone"
             requiredMark
             options={TIME_ZONES}
-            error={form.formState.errors.timeZone?.message}
-            {...form.register("timeZone")}
+            error={formState.errors.timeZone?.message}
+            {...register("timeZone")}
           />
           <label className="mb-1 flex items-center gap-2 whitespace-nowrap text-[12px]">
-            <input type="checkbox" {...form.register("observesDaylightSaving")} />
+            <input type="checkbox" {...register("observesDaylightSaving")} />
             Observes daylight saving
           </label>
         </div>

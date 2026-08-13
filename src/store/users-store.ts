@@ -5,17 +5,49 @@ import { persist } from "zustand/middleware";
 import type { AddUserFormValues } from "@/features/home/schemas/add-user.schema";
 import { ACCESS_LEVELS } from "@/features/home/schemas/add-user.schema";
 
+export const PRACTICE_ACCESS_CODE = "NWH53WH3CK";
+
 export type PracticeUser = {
   id: string;
   isDr: boolean;
   firstName: string;
   lastName: string;
+  middleInitial?: string;
   email: string;
   accessLevel: string;
   isAdmin: boolean;
   emergencyAccess: boolean;
   status: "active" | "inactive";
+  /** Seeded/admin users start verified; newly added users need verification */
+  emailVerified: boolean;
+  verificationEmailSent: boolean;
+  title?: string;
+  suffix?: string;
+  sex?: "female" | "male" | "unspecified";
+  primarySpecialty?: string;
+  secondarySpecialty?: string;
+  taxonomy?: string;
+  primaryFacility?: string;
+  officePhone?: string;
+  officeExt?: string;
+  npiNumber?: string;
+  deaNumber?: string;
+  nadeanNumber?: string;
+  otherIdentifier?: string;
+  usDeptOfLabor?: string;
+  medicalLicenseNumber?: string;
+  medicalLicenseExpiration?: string;
+  medicalLicenseState?: string;
+  degreeOnLicense?: string;
+  upin?: string;
+  medicaid?: string;
+  einTin?: string;
+  medicarePtan?: string;
 };
+
+export type UserProfileUpdate = Partial<
+  Omit<PracticeUser, "id" | "emailVerified" | "verificationEmailSent">
+>;
 
 function createId() {
   return `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -25,10 +57,27 @@ function accessLabel(value: string) {
   return ACCESS_LEVELS.find((level) => level.value === value)?.label ?? value;
 }
 
+export function userDisplayName(user: PracticeUser) {
+  return `${user.isDr ? "Dr. " : ""}${user.firstName} ${user.lastName}`.trim();
+}
+
+export function userStatusLine(user: PracticeUser) {
+  const role = accessLabel(user.accessLevel).replace(/^\d+\s*/, "");
+  const admin = user.isAdmin ? "Admin" : "Non-admin";
+  const active = user.status === "active" ? "Active user" : "Inactive user";
+  return `${role} ${admin} ${active}`;
+}
+
 type UsersState = {
   users: PracticeUser[];
+  /** Dashboard “Add users” setup step */
+  setupComplete: boolean;
   addUser: (input: AddUserFormValues) => PracticeUser;
+  updateUser: (id: string, patch: UserProfileUpdate) => PracticeUser | null;
+  resendVerification: (id: string) => void;
+  getUser: (id: string) => PracticeUser | undefined;
   accessLevelLabel: (value: string) => string;
+  markSetupComplete: () => void;
 };
 
 export const useUsersStore = create<UsersState>()(
@@ -45,8 +94,14 @@ export const useUsersStore = create<UsersState>()(
           isAdmin: true,
           emergencyAccess: false,
           status: "active",
+          emailVerified: true,
+          verificationEmailSent: false,
+          primaryFacility: "suman Ma Practice",
+          officePhone: "(602) 565-9192",
+          sex: "unspecified",
         },
       ],
+      setupComplete: false,
       addUser: (input) => {
         const user: PracticeUser = {
           id: createId(),
@@ -58,12 +113,57 @@ export const useUsersStore = create<UsersState>()(
           isAdmin: input.isAdmin,
           emergencyAccess: input.emergencyAccess,
           status: "active",
+          emailVerified: false,
+          verificationEmailSent: true,
+          primaryFacility: "suman Ma Practice",
+          sex: "unspecified",
         };
-        set({ users: [...get().users, user] });
+        set({ users: [...get().users, user], setupComplete: true });
         return user;
       },
+      updateUser: (id, patch) => {
+        const current = get().users.find((u) => u.id === id);
+        if (!current) return null;
+        const next = { ...current, ...patch };
+        set({
+          users: get().users.map((u) => (u.id === id ? next : u)),
+        });
+        return next;
+      },
+      resendVerification: (id) => {
+        set({
+          users: get().users.map((u) =>
+            u.id === id
+              ? { ...u, verificationEmailSent: true, emailVerified: false }
+              : u,
+          ),
+        });
+      },
+      getUser: (id) => get().users.find((u) => u.id === id),
       accessLevelLabel: accessLabel,
+      markSetupComplete: () => set({ setupComplete: true }),
     }),
-    { name: "pf-users" },
+    {
+      name: "pf-users",
+      partialize: (state) => ({
+        users: state.users,
+        setupComplete: state.setupComplete,
+      }),
+      merge: (persisted, current) => {
+        const p = (persisted as Partial<UsersState> | undefined) ?? {};
+        const users = (p.users ?? current.users).map((u) => ({
+          ...u,
+          emailVerified: u.emailVerified ?? true,
+          verificationEmailSent: u.verificationEmailSent ?? false,
+        }));
+        const invitedExtra = users.some((u) => u.id !== "user-seed-1");
+        return {
+          ...current,
+          ...p,
+          users,
+          setupComplete: p.setupComplete ?? invitedExtra ?? false,
+        };
+      },
+    },
   ),
 );

@@ -35,6 +35,7 @@ function ScheduleIcon({ size = 24, className, ...props }: LucideProps) {
 }
 
 function TasksIcon({ size = 24, className, strokeWidth: _strokeWidth, ...props }: LucideProps) {
+  void _strokeWidth;
   const displaySize = typeof size === "number" ? Math.max(size, 22) : size;
   return (
     <svg
@@ -59,6 +60,7 @@ function TasksIcon({ size = 24, className, strokeWidth: _strokeWidth, ...props }
 }
 
 function ReportsIcon({ size = 24, className, strokeWidth: _strokeWidth, ...props }: LucideProps) {
+  void _strokeWidth;
   return (
     <svg
       width={size}

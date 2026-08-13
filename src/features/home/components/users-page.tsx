@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Info } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/store/ui-store";
-import { useUsersStore } from "@/store/users-store";
+import {
+  PRACTICE_ACCESS_CODE,
+  useUsersStore,
+  userDisplayName,
+} from "@/store/users-store";
 import {
   ACCESS_LEVELS,
   addUserSchema,
   type AddUserFormValues,
 } from "../schemas/add-user.schema";
+import { UserAddedModal } from "./user-added-modal";
 
 const emptyForm: AddUserFormValues = {
   isDr: false,
@@ -26,12 +32,18 @@ const labelClass =
   "text-[10px] font-bold uppercase tracking-wide text-[#9a6b3f]";
 
 export function UsersPage() {
+  const router = useRouter();
   const openUsersTab = useUiStore((s) => s.openUsersTab);
   const showToast = useUiStore((s) => s.showToast);
   const users = useUsersStore((s) => s.users);
   const addUser = useUsersStore((s) => s.addUser);
+  const resendVerification = useUsersStore((s) => s.resendVerification);
   const accessLevelLabel = useUsersStore((s) => s.accessLevelLabel);
   const [showInactive, setShowInactive] = useState(false);
+  const [addedModal, setAddedModal] = useState<{
+    fullName: string;
+    email: string;
+  } | null>(null);
 
   const form = useForm<AddUserFormValues>({
     defaultValues: emptyForm,
@@ -68,9 +80,12 @@ export function UsersPage() {
       return;
     }
 
-    addUser(parsed.data);
+    const user = addUser(parsed.data);
     form.reset(emptyForm);
-    showToast("User added.", "success");
+    setAddedModal({
+      fullName: userDisplayName(user),
+      email: user.email,
+    });
   };
 
   return (
@@ -79,7 +94,7 @@ export function UsersPage() {
         <h1 className="text-[24px] font-light leading-none">Users</h1>
         <span className="text-[13px] text-white/90">
           {activeCount} active user{activeCount === 1 ? "" : "s"} | Practice access
-          code: NWH53WH3CK
+          code: {PRACTICE_ACCESS_CODE}
         </span>
       </div>
 
@@ -220,28 +235,48 @@ export function UsersPage() {
           </thead>
           <tbody>
             {visibleUsers.map((user) => {
-              const displayName = `${user.isDr ? "Dr. " : ""}${user.firstName} ${user.lastName}`.trim();
+              const displayName = userDisplayName(user);
               return (
-                <tr key={user.id} className="bg-[#eef7fc] hover:bg-[#e4f2fa]">
-                  <td className="border-b border-[var(--pf-border-light)] px-4 py-2">
-                    <button
-                      type="button"
-                      className="text-[var(--pf-link)] hover:underline"
-                      onClick={() =>
-                        showToast("User profile editing is a placeholder.", "info")
-                      }
-                    >
-                      {displayName}
-                    </button>
+                <tr
+                  key={user.id}
+                  role="link"
+                  tabIndex={0}
+                  className="cursor-pointer bg-[#eef7fc] hover:bg-[#e4f2fa]"
+                  onClick={() => router.push(`/home/users/${user.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/home/users/${user.id}`);
+                    }
+                  }}
+                >
+                  <td className="border-b border-[var(--pf-border-light)] px-4 py-2 text-[var(--pf-link)]">
+                    {displayName}
                   </td>
                   <td className="border-b border-[var(--pf-border-light)] px-4 py-2 text-[var(--pf-text)]">
-                    {user.email}
+                    <div>{user.email}</div>
+                    {!user.emailVerified ? (
+                      <div className="mt-0.5 text-[11px] text-[#555]">
+                        Verification email sent{" "}
+                        <button
+                          type="button"
+                          className="text-[var(--pf-link)] hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            resendVerification(user.id);
+                            showToast("Verification email resent.", "success");
+                          }}
+                        >
+                          Resend
+                        </button>
+                      </div>
+                    ) : null}
                   </td>
                   <td className="border-b border-[var(--pf-border-light)] px-4 py-2 text-[var(--pf-text)]">
                     {accessLevelLabel(user.accessLevel)}
                   </td>
                   <td className="border-b border-[var(--pf-border-light)] px-4 py-2 text-[var(--pf-text)]">
-                    <div>{user.isAdmin ? "Admin" : "Standard"}</div>
+                    <div>{user.isAdmin ? "Admin" : "Non-Admin"}</div>
                     <div className="text-[#666]">
                       {user.status === "active" ? "Active user" : "Inactive user"}
                     </div>
@@ -255,6 +290,13 @@ export function UsersPage() {
           </tbody>
         </table>
       </div>
+
+      <UserAddedModal
+        open={Boolean(addedModal)}
+        fullName={addedModal?.fullName ?? ""}
+        email={addedModal?.email ?? ""}
+        onClose={() => setAddedModal(null)}
+      />
     </div>
   );
 }

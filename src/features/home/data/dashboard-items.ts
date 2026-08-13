@@ -1,12 +1,35 @@
+export type DashboardIconId =
+  | "wallet"
+  | "users"
+  | "labs"
+  | "imaging"
+  | "rx"
+  | "cpt"
+  | "billing"
+  | "insurance"
+  | "settings"
+  | "book"
+  | "messages"
+  | "templates"
+  | "marketplace"
+  | "payments"
+  | "telehealth";
+
+export type DashboardFooterBrand = "veradigm" | "trustcommerce" | "updox";
+
 export type DashboardItem = {
   id: string;
   title: string;
   description: string;
-  actionLabel: string;
-  icon: "wallet" | "users" | "labs" | "imaging" | "rx" | "cpt" | "billing" | "insurance" | "settings";
+  /** Omit for informational cards with no CTA button */
+  actionLabel?: string;
+  icon: DashboardIconId;
+  /** Where the icon renders — title row (default) or bottom-right decorative */
+  iconPlacement?: "title" | "footer" | "none";
   status?: "incomplete" | "complete";
   actionTone?: "blue" | "orange";
   linkLabel?: string;
+  footerBrand?: DashboardFooterBrand;
 };
 
 export const DASHBOARD_ITEMS: DashboardItem[] = [
@@ -24,13 +47,12 @@ export const DASHBOARD_ITEMS: DashboardItem[] = [
     description: "Invite providers and staff so your team can access charts and schedule.",
     actionLabel: "Add your users",
     icon: "users",
-    status: "incomplete",
-    linkLabel: "Video tutorial",
+    status: "incomplete"
   },
   {
     id: "labs",
     title: "Connect to labs",
-    description: "Order labs electronically and receive results in the patient chart.",
+    description: "Send orders and receive results in your EHR",
     actionLabel: "Add your labs",
     icon: "labs",
     status: "incomplete",
@@ -82,5 +104,70 @@ export const DASHBOARD_ITEMS: DashboardItem[] = [
     description: "Manage personal and practice-level settings.",
     actionLabel: "Open settings",
     icon: "settings",
+  },
+  {
+    id: "customer-support",
+    title: "Customer support",
+    description: "Learn about popular topics, and find resources for your practice",
+    icon: "book",
+    iconPlacement: "footer",
+  },
+  {
+    id: "direct-messaging",
+    title: "Set up direct messaging",
+    description: "Register your unique Direct address",
+    actionLabel: "Set up Direct messaging",
+    icon: "messages",
+    status: "incomplete",
+  },
+  {
+    id: "template-community",
+    title: "Template community",
+    description: "Find, rate, and share charting templates with the community",
+    icon: "templates",
+    iconPlacement: "footer",
+  },
+  {
+    id: "pf-billing-services",
+    title: "Practice Fusion Billing Services",
+    description:
+      "Optimize your practice's revenue and ease medical billing tasks—upgrade your subscription today.",
+    actionLabel: "Learn more",
+    icon: "billing",
+    iconPlacement: "none",
+    status: "incomplete",
+  },
+  {
+    id: "veradigm-programs",
+    title: "Veradigm programs",
+    description: "Connect to a range of programs for your EHR through the Veradigm portal",
+    icon: "marketplace",
+    iconPlacement: "none",
+    footerBrand: "veradigm",
+  },
+  {
+    id: "app-marketplace",
+    title: "App Marketplace",
+    description: "Add new apps, and manage existing authorized apps",
+    actionLabel: "Open App Marketplace",
+    icon: "marketplace",
+    iconPlacement: "none",
+  },
+  {
+    id: "patient-payments",
+    title: "Integrated Patient Payment Solution",
+    description:
+      "Simplify payment collection with TrustCommerce for a smooth, secure, and integrated experience.",
+    icon: "payments",
+    iconPlacement: "none",
+    footerBrand: "trustcommerce",
+  },
+  {
+    id: "telehealth",
+    title: "Telehealth",
+    description: "Register with Updox for an integrated Telehealth solution.",
+    icon: "telehealth",
+    iconPlacement: "none",
+    footerBrand: "updox",
   },
 ];

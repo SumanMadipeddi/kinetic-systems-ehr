@@ -14,11 +14,14 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/store/ui-store";
+import { useUsersStore, userDisplayName } from "@/store/users-store";
 
 type SubTab = {
   label: string;
   href: string;
   closable?: boolean;
+  /** When set, matches a specific user profile route */
+  userId?: string;
 };
 
 type HelpItem =
@@ -46,10 +49,16 @@ const HELP_MENU: HelpItem[] = [
   { kind: "link", label: "Addenda to user agreement" },
 ];
 
+function profileUserId(pathname: string): string | null {
+  const match = pathname.match(/^\/home\/users\/([^/]+)/);
+  return match?.[1] ?? null;
+}
+
 function buildTabs(
   pathname: string,
   practiceInfoTabOpen: boolean,
   usersTabOpen: boolean,
+  profileTab: SubTab | null,
 ): SubTab[] {
   if (pathname.startsWith("/home")) {
     const tabs: SubTab[] = [
@@ -57,10 +66,10 @@ function buildTabs(
       { label: "Documents", href: "/home" },
       { label: "Directory", href: "/home" },
     ];
-    if (practiceInfoTabOpen || pathname.startsWith("/home/practice-info")) {
+    if (practiceInfoTabOpen || pathname.startsWith("/home/addpracticeinfo")) {
       tabs.push({
         label: "Practice Info",
-        href: "/home/practice-info",
+        href: "/home/addpracticeinfo",
         closable: true,
       });
     }
@@ -70,6 +79,9 @@ function buildTabs(
         href: "/home/users",
         closable: true,
       });
+    }
+    if (profileTab) {
+      tabs.push(profileTab);
     }
     return tabs;
   }
@@ -82,15 +94,32 @@ function buildTabs(
   if (pathname.startsWith("/schedule")) {
     return [{ label: "Schedule", href: "/schedule" }];
   }
+  if (pathname.startsWith("/messages")) {
+    const tabs: SubTab[] = [
+      { label: "Messages", href: "/messages" },
+      { label: "Documents", href: "/messages" },
+    ];
+    if (pathname.startsWith("/messages/settings")) {
+      tabs.push({
+        label: "Messages settings",
+        href: "/messages/settings",
+        closable: true,
+      });
+    }
+    return tabs;
+  }
   return [];
 }
 
 function isTabActive(pathname: string, tab: SubTab): boolean {
+  if (tab.userId) {
+    return pathname === `/home/users/${tab.userId}`;
+  }
   if (tab.label === "Practice Info") {
-    return pathname.startsWith("/home/practice-info");
+    return pathname.startsWith("/home/addpracticeinfo");
   }
   if (tab.label === "Users") {
-    return pathname.startsWith("/home/users");
+    return pathname === "/home/users" || pathname === "/home/users/";
   }
   if (tab.label === "Dashboard") {
     return pathname === "/home" || pathname === "/home/";
@@ -100,6 +129,12 @@ function isTabActive(pathname: string, tab: SubTab): boolean {
   }
   if (tab.label === "Schedule") {
     return pathname.startsWith("/schedule");
+  }
+  if (tab.label === "Messages settings") {
+    return pathname.startsWith("/messages/settings");
+  }
+  if (tab.label === "Messages") {
+    return pathname === "/messages" || pathname === "/messages/";
   }
   return false;
 }
@@ -173,7 +208,20 @@ export function TopNav() {
   const closePracticeInfoTab = useUiStore((s) => s.closePracticeInfoTab);
   const usersTabOpen = useUiStore((s) => s.usersTabOpen);
   const closeUsersTab = useUiStore((s) => s.closeUsersTab);
-  const tabs = buildTabs(pathname, practiceInfoTabOpen, usersTabOpen);
+  const users = useUsersStore((s) => s.users);
+  const openProfileId = profileUserId(pathname);
+  const openProfileUser = openProfileId
+    ? users.find((u) => u.id === openProfileId)
+    : undefined;
+  const profileTab: SubTab | null = openProfileUser
+    ? {
+        label: userDisplayName(openProfileUser),
+        href: `/home/users/${openProfileUser.id}`,
+        closable: true,
+        userId: openProfileUser.id,
+      }
+    : null;
+  const tabs = buildTabs(pathname, practiceInfoTabOpen, usersTabOpen, profileTab);
   const [helpOpen, setHelpOpen] = useState(false);
   const helpRef = useRef<HTMLDivElement>(null);
 
@@ -191,7 +239,7 @@ export function TopNav() {
   return (
     <header className="flex shrink-0 flex-col text-[12px] leading-5 text-[var(--pf-topnav-text)]">
       {/* Row 1 — utilities only, right-aligned; each item is a bordered cell */}
-      <div className="flex h-[30px] items-stretch justify-end border-b border-[#444] bg-[#333333]">
+      <div className="flex h-[30px] items-stretch justify-end border-b border-[#525252] bg-[var(--pf-topnav-background)]">
         <div ref={helpRef} className="relative flex">
           <button
             type="button"
@@ -255,7 +303,7 @@ export function TopNav() {
 
       {/* Row 2 — Dashboard / Documents / etc. */}
       {tabs.length > 0 ? (
-        <nav className="flex h-[30px] items-stretch border-b border-[var(--pf-primary)] bg-[#2a2a2a] px-2">
+        <nav className="flex h-[30px] items-stretch border-b border-[var(--pf-primary)] bg-[var(--pf-topnav-background)] px-2">
           {tabs.map((tab, idx) => {
             const active = isTabActive(pathname, tab);
             return (
@@ -276,8 +324,12 @@ export function TopNav() {
                       (pathname.startsWith("/home") &&
                         tab.label !== "Dashboard" &&
                         tab.label !== "Practice Info" &&
-                        tab.label !== "Users") ||
-                      (pathname.startsWith("/tasks") && tab.label !== "Tasks")
+                        tab.label !== "Users" &&
+                        !tab.userId) ||
+                      (pathname.startsWith("/tasks") && tab.label !== "Tasks") ||
+                      (pathname.startsWith("/messages") &&
+                        tab.label !== "Messages" &&
+                        tab.label !== "Messages settings")
                     ) {
                       e.preventDefault();
                       showToast(`${tab.label} is a placeholder in this assessment.`, "info");
@@ -299,6 +351,10 @@ export function TopNav() {
                     className="text-[var(--pf-topnav-text)] hover:text-white"
                     onClick={(e) => {
                       e.preventDefault();
+                      if (tab.userId) {
+                        router.push("/home/users");
+                        return;
+                      }
                       if (tab.label === "Users") {
                         closeUsersTab();
                         if (pathname.startsWith("/home/users")) {
@@ -306,8 +362,12 @@ export function TopNav() {
                         }
                         return;
                       }
+                      if (tab.label === "Messages settings") {
+                        router.push("/messages");
+                        return;
+                      }
                       closePracticeInfoTab();
-                      if (pathname.startsWith("/home/practice-info")) {
+                      if (pathname.startsWith("/home/addpracticeinfo")) {
                         router.push("/home");
                       }
                     }}
