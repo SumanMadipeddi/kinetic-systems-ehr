@@ -1,0 +1,141 @@
+@import "../styles/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--pf-font-family);
+  color: var(--pf-text);
+  background: #000;
+  font-size: var(--pf-font-md);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: var(--pf-link);
+  text-decoration: none;
+}
+
+/* Dense PF scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border: 2px solid #fff;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Compact PF filter rail scrollbar */
+.pf-filter-rail {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+.pf-filter-rail::-webkit-scrollbar {
+  width: 8px;
+}
+.pf-filter-rail::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border: 1px solid #f1f1f1;
+}
+.pf-filter-rail::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Filter rail accordion carets (solid triangles, not line chevrons) */
+.pf-filter-caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  flex-shrink: 0;
+  border-style: solid;
+}
+.pf-filter-caret--closed {
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent #777;
+}
+.pf-filter-caret--open {
+  border-width: 6px 4px 0 4px;
+  border-color: #777 transparent transparent transparent;
+}
+
+/* Filter checkboxes: gray border, pale fill, dark tick, black label */
+.pf-filter-check {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1px solid #b0b0b0;
+  background: #fff;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.pf-filter-check:checked {
+  border-color: #a0a0a0;
+  background-color: #f0f0f0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23333333' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M2.5 6.2l2.4 2.3L9.5 3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 11px 11px;
+}
+.pf-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 21px;
+  margin: 0 10px 5px 15px;
+  font-size: 13px;
+  color: #333333;
+  cursor: pointer;
+}
+
+.pf-incomplete-ribbon {
+  position: absolute;
+  top: 12px;
+  right: -34px;
+  width: 120px;
+  transform: rotate(45deg);
+  background: var(--pf-orange);
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pf-complete-ribbon {
+  position: absolute;
+  top: 12px;
+  right: -34px;
+  width: 120px;
+  transform: rotate(45deg);
+  background: var(--pf-success);
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px 0;
+  text-transform: uppercase;
+}
