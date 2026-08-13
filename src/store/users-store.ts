@@ -50,7 +50,14 @@ export type UserProfileUpdate = Partial<
 >;
 
 function createId() {
-  return `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (ch) => {
+    const n = (Math.random() * 16) | 0;
+    const v = ch === "x" ? n : (n & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 function accessLabel(value: string) {
@@ -85,7 +92,7 @@ export const useUsersStore = create<UsersState>()(
     (set, get) => ({
       users: [
         {
-          id: "user-seed-1",
+          id: "15b64730-7494-4e25-a090-6c1247ae3db1",
           isDr: false,
           firstName: "suman",
           lastName: "Ma",
@@ -156,7 +163,9 @@ export const useUsersStore = create<UsersState>()(
           emailVerified: u.emailVerified ?? true,
           verificationEmailSent: u.verificationEmailSent ?? false,
         }));
-        const invitedExtra = users.some((u) => u.id !== "user-seed-1");
+        const invitedExtra = users.some(
+          (u) => u.id !== "15b64730-7494-4e25-a090-6c1247ae3db1" && u.id !== "user-seed-1",
+        );
         return {
           ...current,
           ...p,

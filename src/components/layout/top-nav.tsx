@@ -50,7 +50,7 @@ const HELP_MENU: HelpItem[] = [
 ];
 
 function profileUserId(pathname: string): string | null {
-  const match = pathname.match(/^\/home\/users\/([^/]+)/);
+  const match = pathname.match(/^\/settings\/user\/([^/]+)/);
   return match?.[1] ?? null;
 }
 
@@ -60,6 +60,11 @@ function buildTabs(
   usersTabOpen: boolean,
   profileTab: SubTab | null,
 ): SubTab[] {
+  if (pathname.startsWith("/settings/user/")) {
+    const tabs: SubTab[] = [{ label: "Settings", href: "/settings" }];
+    if (profileTab) tabs.push(profileTab);
+    return tabs;
+  }
   if (pathname.startsWith("/home")) {
     const tabs: SubTab[] = [
       { label: "Dashboard", href: "/home" },
@@ -79,9 +84,6 @@ function buildTabs(
         href: "/home/users",
         closable: true,
       });
-    }
-    if (profileTab) {
-      tabs.push(profileTab);
     }
     return tabs;
   }
@@ -113,7 +115,10 @@ function buildTabs(
 
 function isTabActive(pathname: string, tab: SubTab): boolean {
   if (tab.userId) {
-    return pathname === `/home/users/${tab.userId}`;
+    return pathname === `/settings/user/${tab.userId}`;
+  }
+  if (tab.label === "Settings") {
+    return pathname === "/settings" || pathname === "/settings/";
   }
   if (tab.label === "Practice Info") {
     return pathname.startsWith("/home/addpracticeinfo");
@@ -213,12 +218,14 @@ export function TopNav() {
   const openProfileUser = openProfileId
     ? users.find((u) => u.id === openProfileId)
     : undefined;
-  const profileTab: SubTab | null = openProfileUser
+  const profileTab: SubTab | null = openProfileId
     ? {
-        label: userDisplayName(openProfileUser),
-        href: `/home/users/${openProfileUser.id}`,
+        label: openProfileUser
+          ? userDisplayName(openProfileUser)
+          : "User",
+        href: `/settings/user/${openProfileId}`,
         closable: true,
-        userId: openProfileUser.id,
+        userId: openProfileId,
       }
     : null;
   const tabs = buildTabs(pathname, practiceInfoTabOpen, usersTabOpen, profileTab);
@@ -324,12 +331,14 @@ export function TopNav() {
                       (pathname.startsWith("/home") &&
                         tab.label !== "Dashboard" &&
                         tab.label !== "Practice Info" &&
-                        tab.label !== "Users" &&
-                        !tab.userId) ||
+                        tab.label !== "Users") ||
                       (pathname.startsWith("/tasks") && tab.label !== "Tasks") ||
                       (pathname.startsWith("/messages") &&
                         tab.label !== "Messages" &&
-                        tab.label !== "Messages settings")
+                        tab.label !== "Messages settings") ||
+                      (pathname.startsWith("/settings/user/") &&
+                        tab.label !== "Settings" &&
+                        !tab.userId)
                     ) {
                       e.preventDefault();
                       showToast(`${tab.label} is a placeholder in this assessment.`, "info");

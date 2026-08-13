@@ -242,11 +242,11 @@ export function UsersPage() {
                   role="link"
                   tabIndex={0}
                   className="cursor-pointer bg-[#eef7fc] hover:bg-[#e4f2fa]"
-                  onClick={() => router.push(`/home/users/${user.id}`)}
+                  onClick={() => router.push(`/settings/user/${user.id}`)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      router.push(`/home/users/${user.id}`);
+                      router.push(`/settings/user/${user.id}`);
                     }
                   }}
                 >

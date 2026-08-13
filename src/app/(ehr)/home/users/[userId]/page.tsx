@@ -1,5 +1,10 @@
-import { UserProfilePage } from "@/features/home/components/user-profile-page";
+import { redirect } from "next/navigation";
 
-export default function HomeUserProfileRoute() {
-  return <UserProfilePage />;
+type Props = {
+  params: { userId: string };
+};
+
+/** Legacy path — Practice Fusion uses /settings/user/:id */
+export default function LegacyHomeUserProfileRedirect({ params }: Props) {
+  redirect(`/settings/user/${params.userId}`);
 }
