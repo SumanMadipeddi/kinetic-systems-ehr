@@ -1,17 +1,17 @@
 export function PracticeFusionBrandHeader() {
   return (
     <>
-      <header className="bg-black px-5 py-[11px]">
+      <header className="flex h-[60px] items-center bg-black pl-14 pr-5">
         <div className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/favicon.ico"
             alt=""
-            width={26}
-            height={26}
-            className="h-[26px] w-[26px] shrink-0 object-contain"
+            width={36}
+            height={36}
+            className="h-[36px] w-[36px] shrink-0 object-contain"
           />
-          <span className="text-[19px] leading-none tracking-[-0.02em]">
+          <span className="text-[22px] leading-none tracking-[-0.02em]">
             <span className="font-normal text-[#00A3E0]">practice</span>
             <span className="font-semibold text-white"> fusion</span>
           </span>

@@ -104,9 +104,9 @@ export function Sidebar() {
         <img
           src="/favicon.ico"
           alt=""
-          width={34}
-          height={34}
-          className="mb-1 h-[34px] w-[34px] object-contain"
+          width={44}
+          height={44}
+          className="mb-1 h-[44px] w-[44px] object-contain"
         />
         <div className="text-center text-[13px] font-normal leading-[1.15] text-[var(--pf-primary)]">
           practice
