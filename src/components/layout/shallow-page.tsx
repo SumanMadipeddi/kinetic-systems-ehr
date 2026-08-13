@@ -20,7 +20,7 @@ export function ShallowPage({ title, description, actionLabel = "Actions" }: Pro
         <Button
           variant="ghost"
           className="border border-white bg-transparent text-white hover:bg-white/10"
-          onClick={() => showToast(`${title} actions are a placeholder.`, "info")}
+          onClick={() => showToast(`${title} actions are unavailable.`, "info")}
         >
           {actionLabel}
           <ChevronDown size={14} />

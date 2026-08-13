@@ -144,7 +144,7 @@ export function NewMessageModal({ open, onClose }: Props) {
                 setRecipientId(RECIPIENTS[0].id);
                 setRecipientQuery(RECIPIENTS[0].name);
                 setShowRecipients(false);
-                showToast("Sent to all in practice (placeholder).", "info");
+                showToast("Sent to all in practice.", "info");
               }}
             >
               Send to all in practice

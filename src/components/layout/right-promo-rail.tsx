@@ -73,7 +73,7 @@ export function RightPromoRail() {
         <button
           type="button"
           className="h-9 rounded bg-[var(--pf-orange)] px-4 text-[13px] font-semibold text-white"
-          onClick={() => showToast("Promotional links are visual-only in this assessment.", "info")}
+          onClick={() => showToast("Promotional links are unavailable.", "info")}
         >
           {promo.cta}
         </button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Search } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
@@ -14,22 +15,16 @@ import { APPOINTMENT_TYPES } from "@/mocks/appointment-types";
 import { useScheduleStore } from "@/store/schedule-store";
 import { useUiStore } from "@/store/ui-store";
 import { patientDisplayName } from "@/types/patient";
+import { addMinutesToTime, formatTime12h } from "../utils/calendar";
 import {
-  addMinutesToTime,
-  formatTime12h,
-} from "../utils/calendar";
-import {
+  blockTimeSchema,
   patientAppointmentSchema,
+  type BlockTimeFormValues,
   type PatientAppointmentFormValues,
 } from "../schemas/appointment.schema";
 import { cn } from "@/lib/cn";
 
 type ModalTab = "with-patient" | "block-time" | "block-range";
-
-function toInputDate(iso: string): string {
-  // yyyy-MM-dd stays for <input type="date">
-  return iso;
-}
 
 function displayDateToIso(mmddyyyy: string): string | null {
   const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(mmddyyyy);
@@ -42,6 +37,32 @@ function isoToDisplay(iso: string): string {
   return `${m}/${d}/${y}`;
 }
 
+function parseTimeInput(value: string): string | null {
+  const trimmed = value.trim();
+  const m24 = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
+  if (m24) {
+    const h = Number(m24[1]);
+    const min = Number(m24[2]);
+    if (h >= 0 && h <= 23 && min >= 0 && min <= 59) {
+      return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+    }
+  }
+  const m12 = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(trimmed);
+  if (m12) {
+    let h = Number(m12[1]);
+    const min = Number(m12[2]);
+    const ampm = m12[3].toUpperCase();
+    if (h < 1 || h > 12 || min < 0 || min > 59) return null;
+    if (ampm === "AM") {
+      if (h === 12) h = 0;
+    } else if (h !== 12) {
+      h += 12;
+    }
+    return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+  }
+  return null;
+}
+
 export function AppointmentModal() {
   const open = useUiStore((s) => s.appointmentModalOpen);
   const draft = useUiStore((s) => s.appointmentDraft);
@@ -51,15 +72,18 @@ export function AppointmentModal() {
   const selectedFacilityId = useScheduleStore((s) => s.selectedFacilityId);
   const selectedProviderIds = useScheduleStore((s) => s.selectedProviderIds);
   const addPatientAppointment = useScheduleStore((s) => s.addPatientAppointment);
+  const addBlockTime = useScheduleStore((s) => s.addBlockTime);
 
   const [tab, setTab] = useState<ModalTab>("with-patient");
   const [query, setQuery] = useState("");
   const [dateText, setDateText] = useState(isoToDisplay(selectedDate));
+  const [blockDateText, setBlockDateText] = useState(isoToDisplay(selectedDate));
+  const [blockTimeText, setBlockTimeText] = useState("09:00 AM");
 
-  const defaultProvider =
-    selectedProviderIds[0] ?? PROVIDERS[0]?.id ?? "";
+  const defaultProvider = selectedProviderIds[0] ?? PROVIDERS[0]?.id ?? "";
 
   const form = useForm<PatientAppointmentFormValues>({
+    resolver: zodResolver(patientAppointmentSchema),
     defaultValues: {
       patientId: "",
       patientName: "",
@@ -72,11 +96,29 @@ export function AppointmentModal() {
       chiefComplaint: "",
       notes: "",
     },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
+
+  const blockForm = useForm<BlockTimeFormValues>({
+    resolver: zodResolver(blockTimeSchema),
+    defaultValues: {
+      providerId: defaultProvider,
+      facilityId: selectedFacilityId,
+      startDate: selectedDate,
+      startTime: "09:00",
+      durationMinutes: 30,
+      reason: "",
+      description: "",
+    },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
   });
 
   const selectedPatientId = form.watch("patientId");
   const startTime = form.watch("startTime");
   const durationMinutes = form.watch("durationMinutes");
+  const blockDescription = blockForm.watch("description") ?? "";
   const selectedPatient = PATIENTS.find((p) => p.id === selectedPatientId);
 
   const matches = useMemo(() => {
@@ -104,10 +146,9 @@ export function AppointmentModal() {
 
   const wasOpen = useRef(false);
   useEffect(() => {
-    // Reset only on open transition so async store rehydration cannot wipe in-progress input.
     if (open && !wasOpen.current) {
       const startDate = draft?.date ?? selectedDate;
-      const startTime = draft?.time ?? "09:00";
+      const nextStartTime = draft?.time ?? "09:00";
       const providerId = draft?.providerId ?? defaultProvider;
       form.reset({
         patientId: "",
@@ -116,12 +157,23 @@ export function AppointmentModal() {
         facilityId: selectedFacilityId,
         appointmentType: "follow-up",
         startDate,
-        startTime,
+        startTime: nextStartTime,
         durationMinutes: 30,
         chiefComplaint: "",
         notes: "",
       });
+      blockForm.reset({
+        providerId,
+        facilityId: selectedFacilityId,
+        startDate,
+        startTime: "09:00",
+        durationMinutes: 30,
+        reason: "",
+        description: "",
+      });
       setDateText(isoToDisplay(startDate));
+      setBlockDateText(isoToDisplay(startDate));
+      setBlockTimeText("09:00 AM");
       setQuery("");
       setTab("with-patient");
     }
@@ -129,43 +181,31 @@ export function AppointmentModal() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const savePatientAppointment = () => {
-    const raw = form.getValues();
-    const payload = {
-      ...raw,
-      patientId: String(raw.patientId ?? ""),
-      patientName: String(raw.patientName ?? ""),
-      providerId: String(raw.providerId || defaultProvider),
-      facilityId: String(raw.facilityId || selectedFacilityId),
-      appointmentType: raw.appointmentType || "follow-up",
-      startDate: String(raw.startDate || selectedDate),
-      startTime: String(raw.startTime || "09:00"),
-      durationMinutes: Number(raw.durationMinutes) || 30,
-      chiefComplaint: raw.chiefComplaint || undefined,
-      notes: raw.notes || undefined,
-    };
-
-    const parsed = patientAppointmentSchema.safeParse(payload);
-
-    if (!parsed.success) {
-      const fieldErrors = parsed.error.flatten().fieldErrors;
-      (Object.keys(fieldErrors) as (keyof PatientAppointmentFormValues)[]).forEach(
-        (key) => {
-          const message = fieldErrors[key]?.[0];
-          if (message) {
-            form.setError(key, { message });
-          }
-        },
-      );
-      const first =
-        parsed.error.issues[0]?.message ?? "Please complete required fields.";
-      showToast(first, "error");
-      return;
-    }
-
-    const entry = addPatientAppointment(parsed.data);
+  const onSavePatient = form.handleSubmit((data) => {
+    const entry = addPatientAppointment(data);
     showToast(`Appointment saved for ${entry.patientName}.`, "success");
     close();
+  });
+
+  const onSaveBlockTime = blockForm.handleSubmit((data) => {
+    addBlockTime({
+      ...data,
+      description: data.description?.trim() || undefined,
+    });
+    showToast("Block time saved.", "success");
+    close();
+  });
+
+  const onSave = () => {
+    if (tab === "with-patient") {
+      void onSavePatient();
+      return;
+    }
+    if (tab === "block-time") {
+      void onSaveBlockTime();
+      return;
+    }
+    showToast("Block range cannot be saved from this dialog.", "info");
   };
 
   const stepTime = (delta: number) => {
@@ -185,17 +225,7 @@ export function AppointmentModal() {
           <Button variant="pillOutline" onClick={close}>
             Cancel
           </Button>
-          <Button
-            variant="pill"
-            data-testid="save-appointment"
-            onClick={() => {
-              if (tab !== "with-patient") {
-                showToast("Only With patient is fully implemented in this assessment.", "info");
-                return;
-              }
-              savePatientAppointment();
-            }}
-          >
+          <Button variant="pill" data-testid="save-appointment" onClick={onSave}>
             Save
           </Button>
         </>
@@ -229,7 +259,7 @@ export function AppointmentModal() {
           className="space-y-3 p-4"
           onSubmit={(e) => {
             e.preventDefault();
-            savePatientAppointment();
+            void onSavePatient();
           }}
         >
           <input type="hidden" data-testid="patient-id" value={selectedPatientId} readOnly />
@@ -251,7 +281,7 @@ export function AppointmentModal() {
               />
             </div>
             {form.formState.errors.patientId ? (
-              <p className="mt-1 text-[11px] text-red-600">
+              <p className="mt-1 text-[11px] text-red-600" data-testid="patient-error">
                 {form.formState.errors.patientId.message}
               </p>
             ) : null}
@@ -295,7 +325,9 @@ export function AppointmentModal() {
               </div>
               <div>
                 <div className="text-[var(--pf-text-muted)]">Last 4 SSN</div>
-                <div>{selectedPatient ? `###-##-${selectedPatient.last4Ssn}` : "###-##-####"}</div>
+                <div>
+                  {selectedPatient ? `###-##-${selectedPatient.last4Ssn}` : "###-##-####"}
+                </div>
               </div>
               <div>
                 <div className="text-[var(--pf-text-muted)]">PRN</div>
@@ -304,10 +336,9 @@ export function AppointmentModal() {
             </div>
             <button
               type="button"
-              className="mt-1 text-[12px] text-[var(--pf-link)] hover:underline"
-              onClick={() =>
-                showToast("Add new patient is out of scope for this assessment.", "info")
-              }
+              className="mt-1 cursor-default text-[12px] text-[var(--pf-text-muted)]"
+              disabled
+              title="Adding patients is unavailable"
             >
               Add new patient
             </button>
@@ -363,7 +394,7 @@ export function AppointmentModal() {
               <input
                 type="date"
                 className="sr-only"
-                value={toInputDate(form.watch("startDate"))}
+                value={form.watch("startDate")}
                 onChange={(e) => {
                   form.setValue("startDate", e.target.value, { shouldValidate: true });
                   setDateText(isoToDisplay(e.target.value));
@@ -433,61 +464,155 @@ export function AppointmentModal() {
             {...form.register("chiefComplaint")}
           />
         </form>
+      ) : tab === "block-time" ? (
+        <form
+          className="space-y-3 p-4 text-[13px]"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void onSaveBlockTime();
+          }}
+        >
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="Block time for"
+              requiredMark
+              options={PROVIDERS.map((p) => ({ value: p.id, label: p.displayName }))}
+              error={blockForm.formState.errors.providerId?.message}
+              {...blockForm.register("providerId")}
+            />
+            <Select
+              label="Facility"
+              requiredMark
+              options={FACILITIES.map((f) => ({ value: f.id, label: f.name }))}
+              error={blockForm.formState.errors.facilityId?.message}
+              {...blockForm.register("facilityId")}
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-bold uppercase text-[#555]">
+                Date <span className="text-[var(--pf-required)]">*</span>
+              </span>
+              <input
+                className="h-8 border border-[var(--pf-border)] px-2 text-[13px]"
+                value={blockDateText}
+                onChange={(e) => {
+                  setBlockDateText(e.target.value);
+                  const iso = displayDateToIso(e.target.value);
+                  if (iso) {
+                    blockForm.setValue("startDate", iso, { shouldValidate: true });
+                  }
+                }}
+              />
+              {blockForm.formState.errors.startDate ? (
+                <span className="text-[11px] text-red-600">
+                  {blockForm.formState.errors.startDate.message}
+                </span>
+              ) : null}
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] font-bold uppercase text-[#555]">
+                Time <span className="text-[var(--pf-required)]">*</span>
+              </span>
+              <input
+                className="h-8 border border-[var(--pf-border)] px-2 text-[13px]"
+                value={blockTimeText}
+                onChange={(e) => {
+                  setBlockTimeText(e.target.value);
+                  const parsed = parseTimeInput(e.target.value);
+                  if (parsed) {
+                    blockForm.setValue("startTime", parsed, { shouldValidate: true });
+                  }
+                }}
+                onBlur={() => {
+                  const parsed = parseTimeInput(blockTimeText);
+                  if (parsed) {
+                    setBlockTimeText(formatTime12h(parsed));
+                    blockForm.setValue("startTime", parsed, { shouldValidate: true });
+                  } else {
+                    setBlockTimeText(formatTime12h(blockForm.getValues("startTime")));
+                  }
+                }}
+              />
+              {blockForm.formState.errors.startTime ? (
+                <span className="text-[11px] text-red-600">
+                  {blockForm.formState.errors.startTime.message}
+                </span>
+              ) : null}
+            </label>
+            <Input
+              label="Duration"
+              requiredMark
+              type="number"
+              error={blockForm.formState.errors.durationMinutes?.message}
+              {...blockForm.register("durationMinutes", { valueAsNumber: true })}
+            />
+          </div>
+          <Select
+            label="Reason"
+            requiredMark
+            placeholder="Select..."
+            options={[
+              { value: "Administrative", label: "Administrative" },
+              { value: "Out of office", label: "Out of office" },
+              { value: "Meeting", label: "Meeting" },
+            ]}
+            error={blockForm.formState.errors.reason?.message}
+            {...blockForm.register("reason")}
+          />
+          <label className="flex flex-col gap-1">
+            <span className="text-[11px] font-bold uppercase text-[#555]">Description</span>
+            <textarea
+              className="min-h-20 border border-[var(--pf-border)] p-2 text-[13px]"
+              maxLength={100}
+              {...blockForm.register("description")}
+            />
+            <span className="self-end text-[11px] text-[var(--pf-text-muted)]">
+              {blockDescription.length}/100
+            </span>
+          </label>
+        </form>
       ) : (
         <div className="space-y-3 p-4 text-[13px]">
           <p className="text-[var(--pf-text-muted)]">
-            {tab === "block-time"
-              ? "Block time form is available visually; saving is implemented for With patient only."
-              : "Block range form is available visually; saving is implemented for With patient only."}
+            Use Block time to reserve a single day interval on the schedule.
           </p>
           <div className="grid grid-cols-2 gap-3">
             <Select
               label="Block time for"
               options={PROVIDERS.map((p) => ({ value: p.id, label: p.displayName }))}
               defaultValue={defaultProvider}
+              disabled
             />
             <Select
               label="Facility"
               options={FACILITIES.map((f) => ({ value: f.id, label: f.name }))}
               defaultValue={selectedFacilityId}
+              disabled
             />
           </div>
-          {tab === "block-time" ? (
-            <div className="grid grid-cols-3 gap-3">
-              <Input label="Date" requiredMark defaultValue={isoToDisplay(selectedDate)} />
-              <Input label="Time" requiredMark defaultValue="09:00 AM" />
-              <Input label="Duration" requiredMark defaultValue="30" />
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-3 gap-3">
-                <Input label="Start date" requiredMark defaultValue={isoToDisplay(selectedDate)} />
-                <Input label="Time" requiredMark defaultValue="09:00 AM" />
-                <label className="flex items-end gap-2 pb-1 text-[12px]">
-                  <input type="checkbox" /> All day
-                </label>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Input label="End date" requiredMark defaultValue={isoToDisplay(selectedDate)} />
-                <Input label="Time" requiredMark defaultValue="09:30 AM" />
-              </div>
-            </>
-          )}
+          <div className="grid grid-cols-3 gap-3">
+            <Input label="Start date" requiredMark defaultValue={isoToDisplay(selectedDate)} disabled />
+            <Input label="Time" requiredMark defaultValue="09:00 AM" disabled />
+            <label className="flex items-end gap-2 pb-1 text-[12px]">
+              <input type="checkbox" disabled /> All day
+            </label>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="End date" requiredMark defaultValue={isoToDisplay(selectedDate)} disabled />
+            <Input label="Time" requiredMark defaultValue="09:30 AM" disabled />
+          </div>
           <Select
             label="Reason"
             requiredMark
             placeholder="Select..."
             options={[
-              { value: "admin", label: "Administrative" },
-              { value: "pto", label: "Out of office" },
-              { value: "meeting", label: "Meeting" },
+              { value: "Administrative", label: "Administrative" },
+              { value: "Out of office", label: "Out of office" },
+              { value: "Meeting", label: "Meeting" },
             ]}
+            disabled
           />
-          <label className="flex flex-col gap-1">
-            <span className="text-[11px] font-bold uppercase text-[#555]">Description</span>
-            <textarea className="min-h-20 border border-[var(--pf-border)] p-2 text-[13px]" maxLength={100} />
-            <span className="self-end text-[11px] text-[var(--pf-text-muted)]">0/100</span>
-          </label>
         </div>
       )}
     </Modal>

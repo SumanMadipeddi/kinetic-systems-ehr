@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/cn";
-import { useUiStore } from "@/store/ui-store";
 
 const SUBTABS = ["General", "Providers/Facilities", "Templates"] as const;
 
 export function ScheduleSettings() {
   const [tab, setTab] = useState<(typeof SUBTABS)[number]>("General");
   const [createEncounters, setCreateEncounters] = useState(true);
-  const showToast = useUiStore((s) => s.showToast);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-auto bg-[var(--pf-page-background)]">
@@ -24,12 +22,7 @@ export function ScheduleSettings() {
                 ? "border-b-2 border-[var(--pf-primary)] font-semibold text-[var(--pf-text)]"
                 : "text-[var(--pf-text-muted)]",
             )}
-            onClick={() => {
-              setTab(t);
-              if (t !== "General") {
-                showToast(`${t} settings are a lightweight placeholder.`, "info");
-              }
-            }}
+            onClick={() => setTab(t)}
           >
             {t}
           </button>
@@ -68,7 +61,7 @@ export function ScheduleSettings() {
           </>
         ) : (
           <p className="text-[13px] text-[var(--pf-text-muted)]">
-            {tab} configuration is intentionally shallow for this assessment.
+            No additional {tab.toLowerCase()} settings are configured.
           </p>
         )}
       </div>

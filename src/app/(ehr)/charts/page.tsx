@@ -4,7 +4,7 @@ export default function ChartsPage() {
   return (
     <ShallowPage
       title="Charts"
-      description="Charts is a shallow navigation destination. Patient chart workflows are outside the assessment scope."
+      description="Patient chart workflows are not configured for this practice yet."
     />
   );
 }

@@ -313,7 +313,7 @@ export function UserProfilePage() {
                   type="button"
                   variant="secondary"
                   onClick={() =>
-                    showToast("Image upload is a placeholder in this assessment.", "info")
+                    showToast("Image upload is unavailable.", "info")
                   }
                 >
                   Upload image
@@ -391,7 +391,7 @@ export function UserProfilePage() {
                     type="button"
                     className="text-[var(--pf-link)] hover:underline"
                     onClick={() =>
-                      showToast("Change email is a placeholder in this assessment.", "info")
+                      showToast("Email changes are unavailable.", "info")
                     }
                   >
                     Change email
@@ -418,7 +418,7 @@ export function UserProfilePage() {
                       type="button"
                       className="text-[var(--pf-link)] hover:underline"
                       onClick={() =>
-                        showToast("Password reset is a placeholder in this assessment.", "info")
+                        showToast("Password reset is unavailable.", "info")
                       }
                     >
                       Reset password

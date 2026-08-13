@@ -208,7 +208,7 @@ export default function MessagesPage() {
                   className="flex w-full px-3 py-2 text-left hover:bg-[#f3f9fc]"
                   onClick={() => {
                     setActionsOpen(false);
-                    showToast("Set up direct messaging is a placeholder.", "info");
+                    showToast("Set up direct messaging is unavailable.", "info");
                   }}
                 >
                   Set up direct messaging
@@ -349,7 +349,7 @@ function ReferralsToolbar({ onAction }: { onAction: (message: string) => void })
       <Button
         variant="orange"
         className="rounded-[3px] px-4"
-        onClick={() => onAction("Send a referral is a placeholder.")}
+        onClick={() => onAction("Send a referral is unavailable.")}
       >
         Send a referral
       </Button>

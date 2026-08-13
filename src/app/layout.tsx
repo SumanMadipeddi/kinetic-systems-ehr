@@ -10,7 +10,7 @@ const openSans = Open_Sans({
 
 export const metadata: Metadata = {
   title: "Practice Fusion EHR",
-  description: "Practice Fusion EHR frontend clone for technical assessment",
+  description: "Practice Fusion EHR frontend clone",
 };
 
 export default function RootLayout({

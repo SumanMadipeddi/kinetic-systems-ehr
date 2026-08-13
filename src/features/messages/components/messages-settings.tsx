@@ -83,7 +83,7 @@ export function MessagesSettings() {
             <button
               type="button"
               className="text-[var(--pf-link)] hover:underline"
-              onClick={() => showToast("Learn more is a placeholder.", "info")}
+              onClick={() => showToast("Learn more is unavailable.", "info")}
             >
               Learn more.
             </button>

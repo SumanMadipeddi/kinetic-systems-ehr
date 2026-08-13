@@ -3,18 +3,13 @@
 import { useState } from "react";
 import { PROVIDERS } from "@/mocks/providers";
 import { APPOINTMENT_TYPES } from "@/mocks/appointment-types";
-import { useScheduleStore } from "@/store/schedule-store";
+import { APPOINTMENT_STATUS_FILTERS } from "@/mocks/appointment-statuses";
+import {
+  ALL_APPOINTMENT_TYPE_IDS,
+  ALL_STATUS_FILTER_CODES,
+  useScheduleStore,
+} from "@/store/schedule-store";
 import { useUiStore } from "@/store/ui-store";
-
-const STATUSES = [
-  { code: "CX", label: "Cancelled", color: "#c0392b" },
-  { code: "LB", label: "In lobby", color: "#27ae60" },
-  { code: "RM", label: "In room", color: "#d4a017" },
-  { code: "NS", label: "No show", color: "#922b21" },
-  { code: "PA", label: "Pending arrival", color: "#27ae60" },
-  { code: "ZZ", label: "Seen (Completed)", color: "#2980b9" },
-  { code: "TN", label: "Tentative", color: "#8e44ad" },
-];
 
 function Accordion({
   title,
@@ -51,23 +46,20 @@ function FilterOption({
   checked,
   onChange,
   children,
-  readOnly,
+  "data-testid": testId,
 }: {
   checked: boolean;
   onChange?: (checked: boolean) => void;
   children: React.ReactNode;
-  readOnly?: boolean;
+  "data-testid"?: string;
 }) {
   return (
-    <label className="pf-filter-option">
+    <label className="pf-filter-option" data-testid={testId}>
       <input
         type="checkbox"
         className="pf-filter-check"
         checked={checked}
-        readOnly={readOnly}
-        onChange={
-          readOnly || !onChange ? undefined : (e) => onChange(e.target.checked)
-        }
+        onChange={onChange ? (e) => onChange(e.target.checked) : undefined}
       />
       {children}
     </label>
@@ -83,15 +75,18 @@ export function ScheduleSidebar() {
   const setShowWeekends = useScheduleStore((s) => s.setShowWeekends);
   const showNonBusinessHours = useScheduleStore((s) => s.showNonBusinessHours);
   const setShowNonBusinessHours = useScheduleStore((s) => s.setShowNonBusinessHours);
-  const showToast = useUiStore((s) => s.showToast);
+  const selectedAppointmentTypes = useScheduleStore(
+    (s) => s.selectedAppointmentTypes,
+  );
+  const setSelectedAppointmentTypes = useScheduleStore(
+    (s) => s.setSelectedAppointmentTypes,
+  );
+  const toggleAppointmentType = useScheduleStore((s) => s.toggleAppointmentType);
+  const selectedStatuses = useScheduleStore((s) => s.selectedStatuses);
+  const setSelectedStatuses = useScheduleStore((s) => s.setSelectedStatuses);
+  const toggleStatus = useScheduleStore((s) => s.toggleStatus);
 
   const [showFreeTimes, setShowFreeTimes] = useState(false);
-  const [selectedTypeIds, setSelectedTypeIds] = useState(() =>
-    APPOINTMENT_TYPES.map((t) => t.id),
-  );
-  const [selectedStatuses, setSelectedStatuses] = useState(() =>
-    STATUSES.map((s) => s.code),
-  );
   const [openSection, setOpenSection] = useState<
     "users" | "display" | "types" | "status" | "availability" | null
   >("users");
@@ -130,8 +125,9 @@ export function ScheduleSidebar() {
           <span className="mx-1 text-[var(--pf-text-muted)]">|</span>
           <button
             type="button"
-            className="text-[var(--pf-link)] hover:underline"
-            onClick={() => showToast("Provider edit is a placeholder.", "info")}
+            className="cursor-default text-[var(--pf-text-muted)]"
+            disabled
+            title="Provider list editing is unavailable"
           >
             Edit
           </button>
@@ -156,10 +152,7 @@ export function ScheduleSidebar() {
         open={openSection === "display"}
         onToggle={() => toggleSection("display")}
       >
-        <FilterOption
-          checked={showWeekends}
-          onChange={setShowWeekends}
-        >
+        <FilterOption checked={showWeekends} onChange={setShowWeekends}>
           Weekends
         </FilterOption>
         <FilterOption
@@ -176,9 +169,9 @@ export function ScheduleSidebar() {
         onToggle={() => toggleSection("types")}
       >
         <FilterOption
-          checked={selectedTypeIds.length === APPOINTMENT_TYPES.length}
+          checked={selectedAppointmentTypes.length === ALL_APPOINTMENT_TYPE_IDS.length}
           onChange={(checked) =>
-            setSelectedTypeIds(checked ? APPOINTMENT_TYPES.map((t) => t.id) : [])
+            setSelectedAppointmentTypes(checked ? [...ALL_APPOINTMENT_TYPE_IDS] : [])
           }
         >
           All
@@ -186,12 +179,9 @@ export function ScheduleSidebar() {
         {APPOINTMENT_TYPES.map((t) => (
           <FilterOption
             key={t.id}
-            checked={selectedTypeIds.includes(t.id)}
-            onChange={(checked) =>
-              setSelectedTypeIds((ids) =>
-                checked ? [...ids, t.id] : ids.filter((id) => id !== t.id),
-              )
-            }
+            data-testid={`filter-type-${t.id}`}
+            checked={selectedAppointmentTypes.includes(t.id)}
+            onChange={() => toggleAppointmentType(t.id)}
           >
             <span className="inline-block h-3 w-3" style={{ background: t.colorVar }} />
             {t.label}
@@ -205,22 +195,19 @@ export function ScheduleSidebar() {
         onToggle={() => toggleSection("status")}
       >
         <FilterOption
-          checked={selectedStatuses.length === STATUSES.length}
+          checked={selectedStatuses.length === ALL_STATUS_FILTER_CODES.length}
           onChange={(checked) =>
-            setSelectedStatuses(checked ? STATUSES.map((s) => s.code) : [])
+            setSelectedStatuses(checked ? [...ALL_STATUS_FILTER_CODES] : [])
           }
         >
           All
         </FilterOption>
-        {STATUSES.map((s) => (
+        {APPOINTMENT_STATUS_FILTERS.map((s) => (
           <FilterOption
             key={s.code}
+            data-testid={`filter-status-${s.code}`}
             checked={selectedStatuses.includes(s.code)}
-            onChange={(checked) =>
-              setSelectedStatuses((codes) =>
-                checked ? [...codes, s.code] : codes.filter((c) => c !== s.code),
-              )
-            }
+            onChange={() => toggleStatus(s.code)}
           >
             <span
               className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold text-white"

@@ -9,11 +9,26 @@ import type {
 import { SEED_SCHEDULE_ENTRIES } from "@/mocks/schedule-entries";
 import { DEFAULT_FACILITY_ID } from "@/mocks/facilities";
 import { DEFAULT_PROVIDER_ID } from "@/mocks/providers";
+import { APPOINTMENT_TYPES } from "@/mocks/appointment-types";
+import { APPOINTMENT_STATUS_FILTERS } from "@/mocks/appointment-statuses";
 import { REFERENCE_TODAY } from "@/features/schedule/utils/calendar";
 
 export type SlotSize = 5 | 10 | 15 | 20 | 30 | 45 | 60 | 90;
 
 export const SLOT_SIZES: SlotSize[] = [5, 10, 15, 20, 30, 45, 60, 90];
+
+export const ALL_APPOINTMENT_TYPE_IDS = APPOINTMENT_TYPES.map((t) => t.id);
+export const ALL_STATUS_FILTER_CODES = APPOINTMENT_STATUS_FILTERS.map((s) => s.code);
+
+export type CreateBlockTimeInput = {
+  providerId: string;
+  facilityId: string;
+  startDate: string;
+  startTime: string;
+  durationMinutes: number;
+  reason: string;
+  description?: string;
+};
 
 type ScheduleState = {
   entries: ScheduleEntry[];
@@ -34,15 +49,24 @@ type ScheduleState = {
   toggleProvider: (id: string) => void;
   setShowWeekends: (value: boolean) => void;
   setShowNonBusinessHours: (value: boolean) => void;
+  setSelectedAppointmentTypes: (ids: string[]) => void;
+  toggleAppointmentType: (id: string) => void;
+  setSelectedStatuses: (codes: string[]) => void;
+  toggleStatus: (code: string) => void;
   setSlotSize: (size: SlotSize) => void;
   addEntry: (entry: ScheduleEntry) => void;
   updateEntry: (id: string, patch: Partial<ScheduleEntry>) => void;
   removeEntry: (id: string) => void;
   addPatientAppointment: (input: CreatePatientAppointmentInput) => ScheduleEntry;
+  addBlockTime: (input: CreateBlockTimeInput) => ScheduleEntry;
 };
 
 function createId(): string {
   return `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function toggleInList(list: string[], id: string): string[] {
+  return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
 }
 
 export const useScheduleStore = create<ScheduleState>()(
@@ -54,8 +78,8 @@ export const useScheduleStore = create<ScheduleState>()(
       selectedProviderIds: [DEFAULT_PROVIDER_ID],
       showWeekends: true,
       showNonBusinessHours: true,
-      selectedAppointmentTypes: [],
-      selectedStatuses: [],
+      selectedAppointmentTypes: [...ALL_APPOINTMENT_TYPE_IDS],
+      selectedStatuses: [...ALL_STATUS_FILTER_CODES],
       slotSize: 30,
       hydrated: false,
 
@@ -68,17 +92,26 @@ export const useScheduleStore = create<ScheduleState>()(
       setSelectedProviderIds: (ids) => set({ selectedProviderIds: ids }),
 
       toggleProvider: (id) => {
-        const current = get().selectedProviderIds;
-        if (current.includes(id)) {
-          set({ selectedProviderIds: current.filter((p) => p !== id) });
-        } else {
-          set({ selectedProviderIds: [...current, id] });
-        }
+        set({ selectedProviderIds: toggleInList(get().selectedProviderIds, id) });
       },
 
       setShowWeekends: (value) => set({ showWeekends: value }),
 
       setShowNonBusinessHours: (value) => set({ showNonBusinessHours: value }),
+
+      setSelectedAppointmentTypes: (ids) => set({ selectedAppointmentTypes: ids }),
+
+      toggleAppointmentType: (id) => {
+        set({
+          selectedAppointmentTypes: toggleInList(get().selectedAppointmentTypes, id),
+        });
+      },
+
+      setSelectedStatuses: (codes) => set({ selectedStatuses: codes }),
+
+      toggleStatus: (code) => {
+        set({ selectedStatuses: toggleInList(get().selectedStatuses, code) });
+      },
 
       setSlotSize: (size) => set({ slotSize: size }),
 
@@ -111,6 +144,23 @@ export const useScheduleStore = create<ScheduleState>()(
         set({ entries: [...get().entries, entry] });
         return entry;
       },
+
+      addBlockTime: (input) => {
+        const entry: ScheduleEntry = {
+          id: createId(),
+          kind: "block-time",
+          providerId: input.providerId,
+          facilityId: input.facilityId,
+          startDate: input.startDate,
+          startTime: input.startTime,
+          durationMinutes: input.durationMinutes,
+          reason: input.reason,
+          description: input.description,
+          status: "tentative",
+        };
+        set({ entries: [...get().entries, entry] });
+        return entry;
+      },
     }),
     {
       name: "pf-schedule-store",
@@ -121,8 +171,27 @@ export const useScheduleStore = create<ScheduleState>()(
         selectedProviderIds: state.selectedProviderIds,
         showWeekends: state.showWeekends,
         showNonBusinessHours: state.showNonBusinessHours,
+        selectedAppointmentTypes: state.selectedAppointmentTypes,
+        selectedStatuses: state.selectedStatuses,
         slotSize: state.slotSize,
       }),
+      merge: (persisted, current) => {
+        const p = (persisted as Partial<ScheduleState> | undefined) ?? {};
+        const types =
+          p.selectedAppointmentTypes && p.selectedAppointmentTypes.length > 0
+            ? p.selectedAppointmentTypes
+            : current.selectedAppointmentTypes;
+        const statuses =
+          p.selectedStatuses && p.selectedStatuses.length > 0
+            ? p.selectedStatuses
+            : current.selectedStatuses;
+        return {
+          ...current,
+          ...p,
+          selectedAppointmentTypes: types,
+          selectedStatuses: statuses,
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);
       },

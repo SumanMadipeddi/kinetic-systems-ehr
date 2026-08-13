@@ -81,10 +81,7 @@ export function DashboardCard({ item }: { item: DashboardItem }) {
       router.push("/home/users");
       return;
     }
-    showToast(
-      `${item.actionLabel ?? item.title} is a placeholder action.`,
-      "info",
-    );
+    showToast(`${item.actionLabel ?? item.title} is unavailable.`, "info");
   };
 
   const clickableCard = item.id === "users" && item.status === "complete";
@@ -146,7 +143,7 @@ export function DashboardCard({ item }: { item: DashboardItem }) {
             className="mt-1 self-start text-[12px] text-[var(--pf-link)] hover:underline"
             onClick={(e) => {
               e.stopPropagation();
-              showToast("Tutorials are not included in this assessment.", "info");
+              showToast("Video tutorials are unavailable.", "info");
             }}
           >
             {item.linkLabel}

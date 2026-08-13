@@ -62,7 +62,7 @@ export function ScheduleToolbar({
           variant="outline"
           size="sm"
           className="h-[25.6px] text-[13px]"
-          onClick={() => showToast("Print is not implemented.", "info")}
+          onClick={() => showToast("Print is unavailable.", "info")}
         >
           Print
         </Button>

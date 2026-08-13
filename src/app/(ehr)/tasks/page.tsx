@@ -82,7 +82,7 @@ export default function TasksPage() {
         if (key === "m") {
           event.preventDefault();
           clearPending();
-          showToast("Send new message is a placeholder.", "info");
+          showToast("Send new message is unavailable.", "info");
           return;
         }
         clearPending();
@@ -136,7 +136,7 @@ export default function TasksPage() {
                   onClick={() => {
                     setActionsOpen(false);
                     showToast(
-                      "Convert historical unsigned encounters to tasks is a placeholder.",
+                      "Convert historical unsigned encounters to tasks is unavailable.",
                       "info",
                     );
                   }}
@@ -160,7 +160,7 @@ export default function TasksPage() {
                   className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-[#f3f9fc]"
                   onClick={() => {
                     setActionsOpen(false);
-                    showToast("Send new message is a placeholder.", "info");
+                    showToast("Send new message is unavailable.", "info");
                   }}
                 >
                   <span>Send new message</span>
@@ -196,7 +196,7 @@ export default function TasksPage() {
                 onClick={() => {
                   setActiveFilter(f);
                   if (f !== "All tasks") {
-                    showToast(`${f} filter is shallow.`, "info");
+                    showToast(`${f} filter is unavailable.`, "info");
                   }
                 }}
               >
@@ -208,7 +208,7 @@ export default function TasksPage() {
             type="button"
             aria-label="More task filters"
             className="inline-flex h-[28px] items-center justify-center bg-[var(--pf-primary-dark)] px-2.5 text-[12px] leading-none text-white hover:brightness-110"
-            onClick={() => showToast("More filters are a placeholder.", "info")}
+            onClick={() => showToast("More filters are unavailable.", "info")}
           >
             ...
           </button>
@@ -216,7 +216,7 @@ export default function TasksPage() {
             type="button"
             aria-label="Task settings"
             className="inline-flex h-[28px] items-center justify-center bg-[var(--pf-primary-dark)] px-2.5 text-white hover:brightness-110"
-            onClick={() => showToast("Task settings are a placeholder.", "info")}
+            onClick={() => showToast("Task settings are unavailable.", "info")}
           >
             <Wrench size={13} />
           </button>

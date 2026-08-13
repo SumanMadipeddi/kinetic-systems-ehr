@@ -90,10 +90,7 @@ export function KnowledgeCenter() {
                         : "entry-wrapper flex w-[400px] items-center gap-3 px-[25px] py-[10px] text-left hover:bg-[#f7f7f7]"
                     }
                     onClick={() =>
-                      showToast(
-                        "Knowledge Center links are visual-only in this assessment.",
-                        "info",
-                      )
+                      showToast("This Knowledge Center article is unavailable.", "info")
                     }
                   >
                     <Icon size={18} className="mt-0.5 shrink-0 text-[#777]" />
@@ -128,7 +125,7 @@ export function KnowledgeCenter() {
               type="button"
               className="h-10 min-w-[170px] rounded-full bg-[var(--pf-orange)] px-6 text-[13px] font-semibold text-white"
               onClick={() =>
-                showToast("Demo scheduling is not included in this assessment.", "info")
+                showToast("Demo scheduling is unavailable.", "info")
               }
             >
               Schedule a demo

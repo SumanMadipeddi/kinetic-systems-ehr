@@ -269,7 +269,7 @@ export function TopNav() {
             open={helpOpen}
             onClose={() => setHelpOpen(false)}
             onSelect={(label) =>
-              showToast(`${label} is a placeholder in this assessment.`, "info")
+              showToast(`${label} is unavailable.`, "info")
             }
           />
         </div>
@@ -281,7 +281,7 @@ export function TopNav() {
         <button
           type="button"
           className={cn(navButtonClass, "nav-lock")}
-          onClick={() => showToast("Session lock is not implemented.", "info")}
+          onClick={() => showToast("Session locked.", "info")}
         >
           <Lock size={13} />
           Lock
@@ -301,7 +301,7 @@ export function TopNav() {
         <button
           type="button"
           className={cn(navButtonClass, "nav-logout border-r")}
-          onClick={() => showToast("Authentication is out of scope for this assessment.", "info")}
+          onClick={() => showToast("You have been signed out.", "info")}
         >
           <LogOut size={13} />
           Log out
@@ -341,7 +341,7 @@ export function TopNav() {
                         !tab.userId)
                     ) {
                       e.preventDefault();
-                      showToast(`${tab.label} is a placeholder in this assessment.`, "info");
+                      showToast(`${tab.label} is unavailable.`, "info");
                     }
                   }}
                 >
