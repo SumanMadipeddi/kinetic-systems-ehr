@@ -75,7 +75,7 @@ export function WeekView() {
       <CalendarControls mode="week" />
       <div ref={scrollerRef} className="min-h-0 flex-1 overflow-auto">
         <div className="sticky top-0 z-20 flex min-w-full border-b border-[var(--pf-border)] bg-[#fafafa]">
-          <div className="h-8 w-[var(--pf-time-column-width)] shrink-0 border-r border-[var(--pf-border)] bg-white" />
+          <div className="h-8 w-[var(--pf-time-column-width)] shrink-0 bg-white" />
           <div className="flex min-w-0 flex-1">
             {days.map((day) => {
               const key = formatDateKey(day);

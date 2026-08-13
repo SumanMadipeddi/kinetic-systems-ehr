@@ -1,6 +1,6 @@
 "use client";
 
-import { Filter, RefreshCw } from "lucide-react";
+import { RefreshCw, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FACILITIES } from "@/mocks/facilities";
 import { useScheduleStore } from "@/store/schedule-store";
@@ -19,6 +19,8 @@ export function ScheduleToolbar({
   const setSelectedFacilityId = useScheduleStore((s) => s.setSelectedFacilityId);
   const toggleFilterRail = useUiStore((s) => s.toggleFilterRail);
   const openAppointmentModal = useUiStore((s) => s.openAppointmentModal);
+  const refreshSchedule = useUiStore((s) => s.refreshSchedule);
+  const scheduleRefreshing = useUiStore((s) => s.scheduleRefreshing);
   const showToast = useUiStore((s) => s.showToast);
 
   return (
@@ -29,16 +31,17 @@ export function ScheduleToolbar({
         className="h-[25.6px] text-[13px]"
         onClick={toggleFilterRail}
       >
-        <Filter size={14} />
+        <SlidersHorizontal size={14} />
         Filter
       </Button>
       <Button
         variant="secondary"
         size="sm"
         className="h-[25.6px] text-[13px]"
-        onClick={() => showToast("Schedule refreshed.", "info")}
+        disabled={scheduleRefreshing}
+        onClick={() => void refreshSchedule()}
       >
-        <RefreshCw size={14} />
+        <RefreshCw size={14} className={scheduleRefreshing ? "animate-spin" : undefined} />
         Refresh
       </Button>
       <select
@@ -69,7 +72,7 @@ export function ScheduleToolbar({
           variant="orange"
           size="sm"
           className="h-[25.6px] text-[13px]"
-          onClick={openAppointmentModal}
+          onClick={() => openAppointmentModal()}
         >
           + Add appointment
         </Button>

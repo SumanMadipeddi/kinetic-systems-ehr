@@ -4,21 +4,89 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home,
-  CalendarDays,
-  CheckSquare,
   FolderPlus,
   Mail,
-  BarChart3,
+  type LucideProps,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
+function ScheduleIcon({ size = 24, className, ...props }: LucideProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+      {...props}
+    >
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+      <line x1="16" x2="16" y1="2" y2="6" />
+      <line x1="8" x2="8" y1="2" y2="6" />
+      <line x1="3" x2="21" y1="10" y2="10" />
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
+    </svg>
+  );
+}
+
+function TasksIcon({ size = 24, className, strokeWidth: _strokeWidth, ...props }: LucideProps) {
+  const displaySize = typeof size === "number" ? Math.max(size, 22) : size;
+  return (
+    <svg
+      width={displaySize}
+      height={displaySize}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+      {...props}
+    >
+      <g transform="translate(12 12) scale(1.2) translate(-12 -12)">
+        <rect width="18" height="18" x="3" y="3" rx="2" />
+        <path d="m9 12 2 2 4-4" />
+      </g>
+    </svg>
+  );
+}
+
+function ReportsIcon({ size = 24, className, strokeWidth: _strokeWidth, ...props }: LucideProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+      {...props}
+    >
+      <line x1="18" x2="18" y1="20" y2="10" />
+      <line x1="12" x2="12" y1="20" y2="4" />
+      <line x1="6" x2="6" y1="20" y2="14" />
+    </svg>
+  );
+}
+
 const NAV = [
   { href: "/home", label: "Home", icon: Home },
-  { href: "/schedule", label: "Schedule", icon: CalendarDays, match: "/schedule" },
-  { href: "/tasks", label: "Tasks", icon: CheckSquare },
+  { href: "/schedule", label: "Schedule", icon: ScheduleIcon, match: "/schedule" },
+  { href: "/tasks", label: "Tasks", icon: TasksIcon },
   { href: "/charts", label: "Charts", icon: FolderPlus },
   { href: "/messages", label: "Messages", icon: Mail },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
+  { href: "/reports", label: "Reports", icon: ReportsIcon },
 ] as const;
 
 export function Sidebar() {
@@ -29,21 +97,28 @@ export function Sidebar() {
       className="flex h-full w-[var(--pf-sidebar-width)] shrink-0 flex-col bg-[var(--pf-sidebar-background)] text-[var(--pf-nav-inactive)]"
       aria-label="Primary"
     >
-      <div className="flex flex-col items-center px-1 pt-3 pb-2">
-        <div
-          className="mb-1 grid h-8 w-8 place-items-center bg-[var(--pf-primary)] text-white text-[11px] font-bold"
+      <div className="flex h-[95px] w-full shrink-0 flex-col items-center justify-center px-1">
+        <svg
+          width="34"
+          height="34"
+          viewBox="0 0 48 48"
           aria-hidden
+          className="mb-1"
         >
-          PF
-        </div>
-        <div className="text-center text-[9px] leading-tight text-[var(--pf-primary)]">
+          <path d="M18 4h12l4 10-10 6-10-6 4-10Z" fill="#5eb8e8" />
+          <path d="M34 18 44 22v12l-10 4-6-10 6-10Z" fill="#14a4ec" />
+          <path d="M30 34l-6 10H12l-4-10 10-6 12 6Z" fill="#0d7fb8" />
+          <path d="M14 30 4 26V14l10-4 6 10-6 10Z" fill="#2bb0f0" />
+          <path d="M18 14h12l6 10-6 10H18l-6-10 6-10Z" fill="#8fd4f5" opacity="0.35" />
+        </svg>
+        <div className="text-center text-[13px] font-normal leading-[1.15] text-[var(--pf-primary)]">
           practice
           <br />
           fusion
         </div>
       </div>
 
-      <nav className="mt-2 flex flex-1 flex-col">
+      <nav className="menu-list mt-0 flex flex-1 flex-col">
         {NAV.map((item) => {
           const match = "match" in item && item.match ? item.match : item.href;
           const active =

@@ -69,7 +69,7 @@ export function DayView() {
       <div ref={scrollerRef} className="min-h-0 flex-1 overflow-auto">
         {/* Provider header stays pinned; times scroll below it */}
         <div className="sticky top-0 z-20 flex min-w-full border-b border-[var(--pf-border)] bg-[#fafafa]">
-          <div className="h-8 w-[var(--pf-time-column-width)] shrink-0 border-r border-[var(--pf-border)] bg-white" />
+          <div className="h-8 w-[var(--pf-time-column-width)] shrink-0 bg-white" />
           <div className="flex min-w-0 flex-1">
             {providers.length === 0 ? (
               <div className="flex h-8 flex-1 items-center px-2 text-[13px] text-[var(--pf-text-muted)]">

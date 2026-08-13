@@ -47,6 +47,10 @@ export interface ScheduleEntry {
   notes?: string;
   chiefComplaint?: string;
 
+  confirmation?: string;
+  copay?: number;
+  eligibility?: string;
+
   status: AppointmentStatus;
 }
 

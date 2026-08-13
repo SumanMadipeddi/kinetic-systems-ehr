@@ -10,6 +10,7 @@ type Props = {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  titleExtra?: ReactNode;
   className?: string;
   width?: number;
   height?: number;
@@ -21,6 +22,7 @@ export function Modal({
   onClose,
   children,
   footer,
+  titleExtra,
   className,
   width = 560,
   height,
@@ -56,7 +58,10 @@ export function Modal({
         style={{ width, height }}
       >
         <div className="flex h-10 shrink-0 items-center justify-between bg-[var(--pf-modal-header)] px-3">
-          <h2 className="text-[15px] font-normal text-white">{title}</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-[15px] font-normal text-white">{title}</h2>
+            {titleExtra}
+          </div>
           <button
             type="button"
             aria-label="Close"

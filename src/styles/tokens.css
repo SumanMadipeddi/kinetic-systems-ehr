@@ -31,7 +31,7 @@
   --pf-tab-active-bg: #e6f0f7;
 
   /* Layout */
-  --pf-sidebar-width: 72px;
+  --pf-sidebar-width: 80px;
   --pf-topnav-height: 30px;
   --pf-promo-width: 160px;
   --pf-schedule-filter-width: 200px;
@@ -44,7 +44,7 @@
   --pf-pill-radius: 999px;
 
   /* Type */
-  --pf-font-family: Arial, Helvetica, sans-serif;
+  --pf-font-family: var(--font-open-sans), "Open Sans", Helvetica, Arial, sans-serif;
   --pf-font-xs: 11px;
   --pf-font-sm: 12px;
   --pf-font-md: 13px;

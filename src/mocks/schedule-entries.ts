@@ -28,6 +28,9 @@ export const SEED_SCHEDULE_ENTRIES: ScheduleEntry[] = [
     appointmentType: "follow-up",
     chiefComplaint: "Follow-up visit",
     status: "pending-arrival",
+    confirmation: "Unconfirmed",
+    copay: 40,
+    eligibility: "Eligible",
   },
   {
     id: "seed-patient-nguyen",
@@ -42,5 +45,8 @@ export const SEED_SCHEDULE_ENTRIES: ScheduleEntry[] = [
     appointmentType: "wellness-exam",
     chiefComplaint: "Annual wellness",
     status: "pending-arrival",
+    confirmation: "Confirmed",
+    copay: 0,
+    eligibility: "Eligible",
   },
 ];

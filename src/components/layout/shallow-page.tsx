@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { useUiStore } from "@/store/ui-store";
 import { Button } from "@/components/ui/button";
 
@@ -17,11 +18,12 @@ export function ShallowPage({ title, description, actionLabel = "Actions" }: Pro
       <div className="flex min-h-[64px] items-center justify-between bg-[var(--pf-primary)] px-4">
         <h1 className="text-[var(--pf-font-lg)] font-normal text-white">{title}</h1>
         <Button
-          variant="secondary"
-          className="border-white text-white bg-transparent hover:bg-white/10"
+          variant="ghost"
+          className="border border-white bg-transparent text-white hover:bg-white/10"
           onClick={() => showToast(`${title} actions are a placeholder.`, "info")}
         >
           {actionLabel}
+          <ChevronDown size={14} />
         </Button>
       </div>
       <div className="p-6">
