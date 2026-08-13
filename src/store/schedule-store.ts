@@ -173,12 +173,17 @@ export const useScheduleStore = create<ScheduleState>()(
         return {
           ...current,
           ...p,
+          // Always open Schedule on the real local "today"
+          selectedDate: REFERENCE_TODAY,
           selectedAppointmentTypes: types,
           selectedStatuses: statuses,
         };
       },
       onRehydrateStorage: () => (state) => {
-        state?.setHydrated(true);
+        if (state) {
+          state.selectedDate = REFERENCE_TODAY;
+          state.setHydrated(true);
+        }
       },
     },
   ),

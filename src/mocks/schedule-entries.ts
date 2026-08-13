@@ -1,15 +1,16 @@
 import type { ScheduleEntry } from "@/types/schedule-entry";
 import { DEFAULT_FACILITY_ID } from "@/mocks/facilities";
 import { DEFAULT_PROVIDER_ID } from "@/mocks/providers";
+import { REFERENCE_TODAY, shiftDay } from "@/features/schedule/utils/calendar";
 
-/** Deterministic seed data around Wed Aug 12, 2026 */
+/** Seed appointments anchored to the current local date */
 export const SEED_SCHEDULE_ENTRIES: ScheduleEntry[] = [
   {
     id: "seed-block-0900",
     kind: "block-time",
     providerId: DEFAULT_PROVIDER_ID,
     facilityId: DEFAULT_FACILITY_ID,
-    startDate: "2026-08-12",
+    startDate: REFERENCE_TODAY,
     startTime: "09:00",
     durationMinutes: 30,
     reason: "Admin block",
@@ -20,7 +21,7 @@ export const SEED_SCHEDULE_ENTRIES: ScheduleEntry[] = [
     kind: "patient",
     providerId: DEFAULT_PROVIDER_ID,
     facilityId: DEFAULT_FACILITY_ID,
-    startDate: "2026-08-12",
+    startDate: REFERENCE_TODAY,
     startTime: "10:00",
     durationMinutes: 30,
     patientId: "pat-001",
@@ -37,7 +38,7 @@ export const SEED_SCHEDULE_ENTRIES: ScheduleEntry[] = [
     kind: "patient",
     providerId: DEFAULT_PROVIDER_ID,
     facilityId: DEFAULT_FACILITY_ID,
-    startDate: "2026-08-13",
+    startDate: shiftDay(REFERENCE_TODAY, 1),
     startTime: "14:00",
     durationMinutes: 45,
     patientId: "pat-002",

@@ -2,11 +2,9 @@
   /* Brand */
   --pf-primary: #14a4ec;
   --pf-primary-dark: #0072bc;
-  --pf-primary-darker: #005a87;
   --pf-modal-header: #0077c5;
   --pf-sidebar-active: #14a4ec;
   --pf-orange: #f37021;
-  --pf-orange-soft: #f38b00;
   --pf-success: #73b925;
   --pf-link: #0072bc;
   --pf-required: #d97706;
@@ -14,7 +12,6 @@
   /* Neutrals */
   --pf-sidebar-background: #111111;
   --pf-topnav-background: #333333;
-  --pf-topnav-secondary: #2a2a2a;
   --pf-topnav-text: #aaaaaa;
   --pf-page-background: #d3d3d3;
   --pf-panel-background: #ffffff;
@@ -35,21 +32,17 @@
   --pf-topnav-height: 30px;
   --pf-promo-width: 170px;
   --pf-schedule-filter-width: 200px;
-  --pf-page-header-min-height: 88px;
   --pf-toolbar-height: 36px;
   --pf-calendar-hour-height: 36.8px;
   --pf-time-column-width: 64px;
-  --pf-border-radius: 0;
   --pf-input-radius: 2px;
   --pf-pill-radius: 999px;
 
   /* Type */
   --pf-font-family: var(--font-open-sans), "Open Sans", Helvetica, Arial, sans-serif;
-  --pf-font-xs: 11px;
   --pf-font-sm: 12px;
   --pf-font-md: 13px;
   --pf-font-lg: 22px;
-  --pf-font-xl: 26px;
 
   /* Appointment type colors */
   --pf-type-wellness: #2aa8a0;

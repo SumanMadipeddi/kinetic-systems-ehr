@@ -26,7 +26,7 @@ Frontend clone of Practice Fusion’s clinician EHR shell, focused on a realisti
 
 ## Core User Journey
 
-1. Open `/schedule` (Day view — demo date is fixed to **Wed Aug 12, 2026** for deterministic seed data)
+1. Open `/schedule` (Day view — opens on **today’s local date**; seed appointments are anchored to that day)
 2. **Add appointment** → search/select patient → set type, provider, facility, date, time, duration
 3. Invalid Save (e.g. missing patient) keeps the dialog open and shows field errors
 4. Valid Save → entry appears on the calendar immediately
@@ -125,7 +125,7 @@ npm run check         # typecheck + lint + unit + build
 - No external EHR integrations (labs, eRx, imaging, eligibility networks)
 - No real advertising infrastructure (static promo content)
 - Block **range** UI is present; save is implemented for With patient + Block time
-- Calendar demo date is fixed to `2026-08-12` so seed data and e2e stay deterministic
+- Schedule opens on the device’s local **today**; seed appointments are anchored to that date
 - Focus on frontend fidelity and realistic core journeys over breadth
 
 ## Demo session shell

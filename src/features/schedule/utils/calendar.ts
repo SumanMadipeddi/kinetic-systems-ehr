@@ -12,11 +12,11 @@ import {
 } from "date-fns";
 import type { ScheduleEntry } from "@/types/schedule-entry";
 
-/** Fixed demo calendar date for deterministic seed data and Playwright runs */
-export const REFERENCE_TODAY = "2026-08-12";
+/** Calendar "today" — local device date (yyyy-MM-dd) */
+export const REFERENCE_TODAY = format(new Date(), "yyyy-MM-dd");
 
 export function parseDate(dateStr: string): Date {
-  return parse(dateStr, "yyyy-MM-dd", new Date(2026, 0, 1));
+  return parse(dateStr, "yyyy-MM-dd", new Date());
 }
 
 export function parseDateTime(dateStr: string, timeStr: string): Date {

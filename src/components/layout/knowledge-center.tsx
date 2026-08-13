@@ -30,9 +30,9 @@ const LINKS = [
 ] as const;
 
 const NORMAL_WIDTH = 400;
-const EXPANDED_WIDTH = Math.round(NORMAL_WIDTH * 2.5); // +50%
+const EXPANDED_WIDTH = Math.round(NORMAL_WIDTH * 1.5); // +50%
 const NORMAL_LIST_MAX = 320;
-const EXPANDED_LIST_MAX = Math.round(NORMAL_LIST_MAX * 0.9); // -20%
+const EXPANDED_LIST_MAX = Math.round(NORMAL_LIST_MAX * 0.8); // -20%
 const NORMAL_FOOTER = 127;
 const EXPANDED_FOOTER = Math.round(NORMAL_FOOTER * 0.8); // -20%
 
@@ -73,7 +73,7 @@ export function KnowledgeCenter() {
           role="dialog"
           aria-label="Knowledge Center"
         >
-          <div className="widget-header-style flex h-[50px] w-full items-center gap-2 bg-[#14a4ec] pb-0 pl-[14px] pr-[25px] pt-0 text-white">
+          <div className="flex h-[50px] w-full items-center gap-2 bg-[#14a4ec] pb-0 pl-[14px] pr-[25px] pt-0 text-white">
             <button
               type="button"
               aria-label={expanded ? "Minimize Knowledge Center" : "Expand Knowledge Center"}
@@ -89,7 +89,7 @@ export function KnowledgeCenter() {
             <span className="text-[15px] font-normal">Knowledge Center</span>
           </div>
 
-          <div className="gpx-kc-search-box__container flex h-[50px] w-full items-center px-[25px]">
+          <div className="flex h-[50px] w-full items-center px-[25px]">
             <label className="relative block w-full">
               <span className="sr-only">Search the Knowledge Base</span>
               <input
@@ -119,7 +119,7 @@ export function KnowledgeCenter() {
                   <button
                     type="button"
                     className={cn(
-                      "entry-wrapper flex w-full gap-3 px-[25px] py-[10px] text-left hover:bg-[#f7f7f7]",
+                      "flex w-full gap-3 px-[25px] py-[10px] text-left hover:bg-[#f7f7f7]",
                       featured ? "min-h-[80px] items-start" : "items-center",
                     )}
                     onClick={() =>
@@ -151,7 +151,7 @@ export function KnowledgeCenter() {
           </ul>
 
           <div
-            className="widget-article flex w-full flex-col items-center justify-center gap-3 bg-[#e8f6fc] px-[25px] py-[10px]"
+            className="flex w-full flex-col items-center justify-center gap-3 bg-[#e8f6fc] px-[25px] py-[10px]"
             style={{ height: footerHeight }}
           >
             <p className="text-center text-[15px] font-semibold text-[#2a6a8a]">
