@@ -7,9 +7,11 @@ import {
   LayoutGrid,
   Link2,
   Search,
-  Scan,
+  Expand,
+  Shrink,
 } from "lucide-react";
 import { useUiStore } from "@/store/ui-store";
+import { cn } from "@/lib/cn";
 
 const LINKS = [
   { icon: Flag, label: "Learn how to navigate the EHR" },
@@ -27,15 +29,25 @@ const LINKS = [
   { icon: Link2, label: "Knowledge Base" },
 ] as const;
 
+const NORMAL_WIDTH = 400;
+const EXPANDED_WIDTH = Math.round(NORMAL_WIDTH * 2.5); // +50%
+const NORMAL_LIST_MAX = 320;
+const EXPANDED_LIST_MAX = Math.round(NORMAL_LIST_MAX * 0.9); // -20%
+const NORMAL_FOOTER = 127;
+const EXPANDED_FOOTER = Math.round(NORMAL_FOOTER * 0.8); // -20%
+
 export function KnowledgeCenter() {
   const [open, setOpen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const showToast = useUiStore((s) => s.showToast);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       if (event.data?.type !== "apt-widget-toggle") return;
-      setOpen(Boolean(event.data.open));
+      const nextOpen = Boolean(event.data.open);
+      setOpen(nextOpen);
+      if (!nextOpen) setExpanded(false);
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
@@ -48,20 +60,36 @@ export function KnowledgeCenter() {
     );
   }, [open]);
 
+  const cardWidth = expanded ? EXPANDED_WIDTH : NORMAL_WIDTH;
+  const listMax = expanded ? EXPANDED_LIST_MAX : NORMAL_LIST_MAX;
+  const footerHeight = expanded ? EXPANDED_FOOTER : NORMAL_FOOTER;
+
   return (
-    <div className="pointer-events-none fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div className="pointer-events-none fixed bottom-5 right-6 z-50 flex flex-col items-end gap-3">
       {open ? (
         <div
-          className="pointer-events-auto flex w-[400px] flex-col overflow-hidden bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+          className="pointer-events-auto mr-16 flex flex-col overflow-hidden overflow-x-hidden rounded-lg border border-[var(--pf-border-light)] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+          style={{ width: cardWidth }}
           role="dialog"
           aria-label="Knowledge Center"
         >
-          <div className="widget-header-style flex h-[50px] w-[400px] items-center gap-2 bg-[#14a4ec] pb-0 pl-[30px] pr-[25px] pt-0 text-white">
-            <Scan size={16} strokeWidth={2.25} />
+          <div className="widget-header-style flex h-[50px] w-full items-center gap-2 bg-[#14a4ec] pb-0 pl-[14px] pr-[25px] pt-0 text-white">
+            <button
+              type="button"
+              aria-label={expanded ? "Minimize Knowledge Center" : "Expand Knowledge Center"}
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-white hover:bg-white/15"
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? (
+                <Shrink size={16} strokeWidth={2.25} />
+              ) : (
+                <Expand size={16} strokeWidth={2.25} />
+              )}
+            </button>
             <span className="text-[15px] font-normal">Knowledge Center</span>
           </div>
 
-          <div className="gpx-kc-search-box__container flex h-[50px] w-[400px] items-center px-[25px]">
+          <div className="gpx-kc-search-box__container flex h-[50px] w-full items-center px-[25px]">
             <label className="relative block w-full">
               <span className="sr-only">Search the Knowledge Base</span>
               <input
@@ -76,7 +104,13 @@ export function KnowledgeCenter() {
             </label>
           </div>
 
-          <ul className="max-h-[320px] overflow-y-auto border-t border-[var(--pf-border-light)]">
+          <ul
+            className={cn(
+              "overflow-x-hidden border-t border-[var(--pf-border-light)]",
+              expanded ? "overflow-y-auto" : "overflow-y-visible",
+            )}
+            style={expanded ? { maxHeight: listMax } : undefined}
+          >
             {LINKS.map((item) => {
               const Icon = item.icon;
               const featured = "featured" in item && item.featured;
@@ -84,11 +118,10 @@ export function KnowledgeCenter() {
                 <li key={item.label}>
                   <button
                     type="button"
-                    className={
-                      featured
-                        ? "entry-wrapper flex min-h-[80px] w-[400px] items-start gap-3 px-[25px] py-[10px] text-left hover:bg-[#f7f7f7]"
-                        : "entry-wrapper flex w-[400px] items-center gap-3 px-[25px] py-[10px] text-left hover:bg-[#f7f7f7]"
-                    }
+                    className={cn(
+                      "entry-wrapper flex w-full gap-3 px-[25px] py-[10px] text-left hover:bg-[#f7f7f7]",
+                      featured ? "min-h-[80px] items-start" : "items-center",
+                    )}
                     onClick={() =>
                       showToast("This Knowledge Center article is unavailable.", "info")
                     }
@@ -117,7 +150,10 @@ export function KnowledgeCenter() {
             })}
           </ul>
 
-          <div className="widget-article flex h-[127px] w-[400px] flex-col items-center justify-center gap-3 bg-[#e8f6fc] px-[25px] py-[10px]">
+          <div
+            className="widget-article flex w-full flex-col items-center justify-center gap-3 bg-[#e8f6fc] px-[25px] py-[10px]"
+            style={{ height: footerHeight }}
+          >
             <p className="text-center text-[15px] font-semibold text-[#2a6a8a]">
               Ready to tour your new EHR?
             </p>
