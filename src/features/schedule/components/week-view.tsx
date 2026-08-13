@@ -73,6 +73,11 @@ export function WeekView() {
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-white">
       <CalendarControls mode="week" />
+      {selectedProviderIds.length === 0 ? (
+        <div className="flex flex-1 items-center justify-center px-4 text-[13px] text-[var(--pf-text-muted)]">
+          Select at least one provider in Filters.
+        </div>
+      ) : (
       <div ref={scrollerRef} className="min-h-0 flex-1 overflow-auto">
         <div className="sticky top-0 z-20 flex min-w-full border-b border-[var(--pf-border)] bg-[#fafafa]">
           <div className="h-8 w-[var(--pf-time-column-width)] shrink-0 bg-white" />
@@ -169,6 +174,7 @@ export function WeekView() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

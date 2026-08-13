@@ -54,9 +54,6 @@ type ScheduleState = {
   setSelectedStatuses: (codes: string[]) => void;
   toggleStatus: (code: string) => void;
   setSlotSize: (size: SlotSize) => void;
-  addEntry: (entry: ScheduleEntry) => void;
-  updateEntry: (id: string, patch: Partial<ScheduleEntry>) => void;
-  removeEntry: (id: string) => void;
   addPatientAppointment: (input: CreatePatientAppointmentInput) => ScheduleEntry;
   addBlockTime: (input: CreateBlockTimeInput) => ScheduleEntry;
 };
@@ -115,16 +112,6 @@ export const useScheduleStore = create<ScheduleState>()(
 
       setSlotSize: (size) => set({ slotSize: size }),
 
-      addEntry: (entry) => set({ entries: [...get().entries, entry] }),
-
-      updateEntry: (id, patch) =>
-        set({
-          entries: get().entries.map((e) => (e.id === id ? { ...e, ...patch } : e)),
-        }),
-
-      removeEntry: (id) =>
-        set({ entries: get().entries.filter((e) => e.id !== id) }),
-
       addPatientAppointment: (input) => {
         const entry: ScheduleEntry = {
           id: createId(),
@@ -177,14 +164,12 @@ export const useScheduleStore = create<ScheduleState>()(
       }),
       merge: (persisted, current) => {
         const p = (persisted as Partial<ScheduleState> | undefined) ?? {};
-        const types =
-          p.selectedAppointmentTypes && p.selectedAppointmentTypes.length > 0
-            ? p.selectedAppointmentTypes
-            : current.selectedAppointmentTypes;
-        const statuses =
-          p.selectedStatuses && p.selectedStatuses.length > 0
-            ? p.selectedStatuses
-            : current.selectedStatuses;
+        const types = Array.isArray(p.selectedAppointmentTypes)
+          ? p.selectedAppointmentTypes
+          : current.selectedAppointmentTypes;
+        const statuses = Array.isArray(p.selectedStatuses)
+          ? p.selectedStatuses
+          : current.selectedStatuses;
         return {
           ...current,
           ...p,

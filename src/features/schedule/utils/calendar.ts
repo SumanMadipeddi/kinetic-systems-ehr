@@ -4,7 +4,6 @@ import {
   format,
   parse,
   startOfWeek,
-  endOfWeek,
   isSameDay,
   startOfDay,
   differenceInMinutes,
@@ -13,6 +12,7 @@ import {
 } from "date-fns";
 import type { ScheduleEntry } from "@/types/schedule-entry";
 
+/** Fixed demo calendar date for deterministic seed data and Playwright runs */
 export const REFERENCE_TODAY = "2026-08-12";
 
 export function parseDate(dateStr: string): Date {
@@ -44,10 +44,6 @@ export function formatTime12h(timeStr: string): string {
 
 export function getWeekStart(dateStr: string): Date {
   return startOfWeek(parseDate(dateStr), { weekStartsOn: 0 });
-}
-
-export function getWeekEnd(dateStr: string): Date {
-  return endOfWeek(parseDate(dateStr), { weekStartsOn: 0 });
 }
 
 export function getWeekDays(dateStr: string): Date[] {
@@ -141,13 +137,6 @@ export function getVisibleSegmentsForDay(
 
 export function entriesForDay(entries: ScheduleEntry[], day: string): ScheduleEntry[] {
   return entries.filter((entry) => getVisibleSegmentsForDay(entry, day).length > 0);
-}
-
-export function entriesForWeek(entries: ScheduleEntry[], dayInWeek: string): ScheduleEntry[] {
-  const days = getWeekDays(dayInWeek).map(formatDateKey);
-  return entries.filter((entry) =>
-    days.some((d) => getVisibleSegmentsForDay(entry, d).length > 0),
-  );
 }
 
 export function timeToMinutes(timeStr: string): number {

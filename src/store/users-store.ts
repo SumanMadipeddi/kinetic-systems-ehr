@@ -5,7 +5,7 @@ import { persist } from "zustand/middleware";
 import type { AddUserFormValues } from "@/features/home/schemas/add-user.schema";
 import { ACCESS_LEVELS } from "@/features/home/schemas/add-user.schema";
 
-export const PRACTICE_ACCESS_CODE = "NWH53WH3CK";
+export const PRACTICE_ACCESS_CODE = "DEMO8X42Q";
 
 export type PracticeUser = {
   id: string;
@@ -82,9 +82,7 @@ type UsersState = {
   addUser: (input: AddUserFormValues) => PracticeUser;
   updateUser: (id: string, patch: UserProfileUpdate) => PracticeUser | null;
   resendVerification: (id: string) => void;
-  getUser: (id: string) => PracticeUser | undefined;
   accessLevelLabel: (value: string) => string;
-  markSetupComplete: () => void;
 };
 
 export const useUsersStore = create<UsersState>()(
@@ -96,7 +94,7 @@ export const useUsersStore = create<UsersState>()(
           isDr: false,
           firstName: "suman",
           lastName: "Ma",
-          email: "suman970629@gmail.com",
+          email: "suman.ma@example.com",
           accessLevel: "4",
           isAdmin: true,
           emergencyAccess: false,
@@ -104,7 +102,7 @@ export const useUsersStore = create<UsersState>()(
           emailVerified: true,
           verificationEmailSent: false,
           primaryFacility: "suman Ma Practice",
-          officePhone: "(602) 565-9192",
+          officePhone: "(408) 555-0142",
           sex: "unspecified",
         },
       ],
@@ -146,9 +144,7 @@ export const useUsersStore = create<UsersState>()(
           ),
         });
       },
-      getUser: (id) => get().users.find((u) => u.id === id),
       accessLevelLabel: accessLabel,
-      markSetupComplete: () => set({ setupComplete: true }),
     }),
     {
       name: "pf-users",
@@ -164,7 +160,7 @@ export const useUsersStore = create<UsersState>()(
           verificationEmailSent: u.verificationEmailSent ?? false,
         }));
         const invitedExtra = users.some(
-          (u) => u.id !== "15b64730-7494-4e25-a090-6c1247ae3db1" && u.id !== "user-seed-1",
+          (u) => u.id !== "15b64730-7494-4e25-a090-6c1247ae3db1",
         );
         return {
           ...current,

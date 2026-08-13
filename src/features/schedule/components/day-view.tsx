@@ -33,9 +33,7 @@ export function DayView() {
     [startHour, endHour],
   );
 
-  const providers = PROVIDERS.filter(
-    (p) => selectedProviderIds.length === 0 || selectedProviderIds.includes(p.id),
-  );
+  const providers = PROVIDERS.filter((p) => selectedProviderIds.includes(p.id));
 
   useEffect(() => {
     if (!scrollerRef.current) return;

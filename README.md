@@ -17,26 +17,22 @@ Frontend clone of Practice Fusion’s clinician EHR shell, focused on a realisti
 - Add Appointment → With patient (search, validation, save, persist)
 - Add Appointment → Block time (validation, save, persist)
 - Schedule filter rail (facility/provider/type/status → calendar)
-- Custom CSS Grid calendar with multi-day segment rendering
+- Custom CSS Grid calendar with day-segment rendering
 
 **Supporting / shallow**
 
 - Tasks, Charts, Messages, Reports, global Settings navigation surfaces
 - Knowledge Center / promo rail (static UI)
 
-
-
 ## Core User Journey
 
-1. Open `/schedule` (Day view)
+1. Open `/schedule` (Day view — demo date is fixed to **Wed Aug 12, 2026** for deterministic seed data)
 2. **Add appointment** → search/select patient → set type, provider, facility, date, time, duration
 3. Invalid Save (e.g. missing patient) keeps the dialog open and shows field errors
 4. Valid Save → entry appears on the calendar immediately
 5. Reload → appointment remains (Zustand persist)
 6. Optional: **Block time** tab → save a blocked interval; it renders and persists the same way
 7. Filter rail: uncheck an appointment type (e.g. Follow-Up) → matching entries hide; recheck → they return
-
-
 
 ## Architecture
 
@@ -50,8 +46,6 @@ Next.js App Router
        └─ schedule calendar: custom CSS Grid + day segments
 ```
 
-
-
 ## Project Structure
 
 ```
@@ -59,7 +53,7 @@ src/
   app/                 route composition (App Router)
   components/
     layout/            shared shell (sidebar, top nav, promo, toast)
-    ui/                reusable primitives (Button, Input, Modal, …)
+    ui/                reusable UI primitives
   features/
     home/              dashboard, practice info, users
     schedule/          calendar views, appointment modal, filters
@@ -69,26 +63,21 @@ src/
   types/               domain types (ScheduleEntry, …)
 ```
 
-
-
 ## Engineering Decisions
 
-
-
 ### Why Next.js
-
-App Router layout composition and straightforward static/SSR hosting for a frontend-only assessment.
+App Router layout composition and straightforward Vercel deployment for a frontend-only screen.
 
 ### Why Zustand
+Lightweight client state with persist middleware—enough for realistic EHR interactions without inventing a backend.
 
-Lightweight client state with persist middleware—enough for realistic EHR interactions without inventing a backend the assessment did not require.
+### Why custom CSS Grid calendar
+Precise Day/Week layout control without fighting a general calendar library.
 
 ### Why deterministic mock data
-
 Repeatable demos and Playwright/Vitest runs without auth, PHI, or network flakiness.
 
 ### Why ScheduleEntry
-
 One domain object represents patient visits and blocked time (`kind`), with multi-day ranges expressed as start/end and rendered as per-day segments.
 
 ## Validation and Persistence
@@ -101,15 +90,13 @@ React Hook Form + zodResolver(Zod schema)
   → localStorage
 ```
 
-
-
 ## Testing
 
 ```bash
 npm test              # Vitest unit tests
-npm run test:e2e      # Playwright end-to-end
+npm run test:e2e      # Playwright (headless)
 npx playwright test --headed
-npm run typecheck     # tsc --noEmit
+npm run typecheck
 npm run lint
 npm run build
 npm run check         # typecheck + lint + unit + build
@@ -127,8 +114,7 @@ npm run check         # typecheck + lint + unit + build
 - Save without patient → dialog stays open + validation message
 - Follow-Up type filter hides/restores a seeded entry
 - Practice Info edit → Home card updates → survives reload
-
-
+- Block time create → visible → survives reload
 
 ## Intentional Tradeoffs
 
@@ -136,13 +122,20 @@ npm run check         # typecheck + lint + unit + build
 - No backend / database
 - No external EHR integrations (labs, eRx, imaging, eligibility networks)
 - No real advertising infrastructure (static promo content)
+- Block **range** UI is present; save is implemented for With patient + Block time
+- Calendar demo date is fixed to `2026-08-12` so seed data and e2e stay deterministic
 - Focus on frontend fidelity and realistic core journeys over breadth
-
-
 
 ## Data / Privacy
 
 All patient and practice data is deterministic fictional mock data. No real PHI is used.
+
+## Deploy (Vercel)
+
+1. Import the GitHub repo into Vercel (Next.js preset)
+2. Build command: `npm run build`
+3. Output: Next.js default (no env vars required)
+4. Update the Live Demo URL above after deploy
 
 ## Run Locally
 

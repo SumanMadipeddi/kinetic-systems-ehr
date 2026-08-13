@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PROVIDERS } from "@/mocks/providers";
+import { DEFAULT_PROVIDER_ID, PROVIDERS } from "@/mocks/providers";
 import { APPOINTMENT_TYPES } from "@/mocks/appointment-types";
 import { APPOINTMENT_STATUS_FILTERS } from "@/mocks/appointment-statuses";
 import {
@@ -111,6 +111,7 @@ export function ScheduleSidebar() {
           onChange={(checked) =>
             setSelectedProviderIds(checked ? PROVIDERS.map((p) => p.id) : [])
           }
+          data-testid="filter-providers-all"
         >
           All
         </FilterOption>
@@ -118,7 +119,8 @@ export function ScheduleSidebar() {
           <button
             type="button"
             className="text-[var(--pf-link)] hover:underline"
-            onClick={() => setSelectedProviderIds(PROVIDERS.map((p) => p.id))}
+            data-testid="filter-just-me"
+            onClick={() => setSelectedProviderIds([DEFAULT_PROVIDER_ID])}
           >
             Just me
           </button>

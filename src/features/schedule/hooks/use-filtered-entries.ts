@@ -17,12 +17,7 @@ export function useFilteredEntries(): ScheduleEntry[] {
   return useMemo(() => {
     return entries.filter((entry) => {
       if (entry.facilityId !== selectedFacilityId) return false;
-      if (
-        selectedProviderIds.length > 0 &&
-        !selectedProviderIds.includes(entry.providerId)
-      ) {
-        return false;
-      }
+      if (!selectedProviderIds.includes(entry.providerId)) return false;
 
       // Patient entries with a type must match the type filter.
       // Block-time / block-range (no appointmentType) stay visible regardless of type filters.

@@ -26,7 +26,6 @@ type UiState = {
   openAppointmentModal: (draft?: AppointmentDraft) => void;
   closeAppointmentModal: () => void;
   toggleFilterRail: () => void;
-  setFilterRailOpen: (open: boolean) => void;
   openPracticeInfoTab: () => void;
   closePracticeInfoTab: () => void;
   openUsersTab: () => void;
@@ -50,7 +49,6 @@ export const useUiStore = create<UiState>((set, get) => ({
   closeAppointmentModal: () =>
     set({ appointmentModalOpen: false, appointmentDraft: null }),
   toggleFilterRail: () => set((s) => ({ filterRailOpen: !s.filterRailOpen })),
-  setFilterRailOpen: (open) => set({ filterRailOpen: open }),
   openPracticeInfoTab: () => set({ practiceInfoTabOpen: true }),
   closePracticeInfoTab: () => set({ practiceInfoTabOpen: false }),
   openUsersTab: () => set({ usersTabOpen: true }),

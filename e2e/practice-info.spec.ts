@@ -13,8 +13,11 @@ test("practice info save updates home card and persists after reload", async ({ 
   await page.getByTestId("practice-save").click();
 
   await expect(page.getByRole("heading", { name: "Practice dashboard" })).toBeVisible();
-  await expect(page.getByText(uniqueName)).toBeVisible();
+  const practiceCard = page.getByRole("button", { name: "Gather practice information" });
+  await expect(practiceCard).toContainText(uniqueName);
 
   await page.reload();
-  await expect(page.getByText(uniqueName)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Gather practice information" }),
+  ).toContainText(uniqueName);
 });

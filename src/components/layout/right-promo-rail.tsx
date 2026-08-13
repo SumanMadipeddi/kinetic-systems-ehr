@@ -58,7 +58,7 @@ export function RightPromoRail() {
 
   return (
     <aside
-      className="relative flex h-full w-[160px] min-w-[170px] max-w-[170px] shrink-0 flex-col overflow-y-auto border-l border-[var(--pf-border)] bg-[#fafafa]"
+      className="relative flex h-full w-[170px] min-w-[170px] max-w-[170px] shrink-0 flex-col overflow-y-auto border-l border-[var(--pf-border)] bg-[#fafafa]"
       aria-label="Advertisement"
     >
       <div className="ad-label mb-[2px] px-5 pt-3 text-[11px] leading-[13px] text-[#666]">

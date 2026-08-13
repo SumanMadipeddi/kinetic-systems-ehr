@@ -516,6 +516,7 @@ export function AppointmentModal() {
               </span>
               <input
                 className="h-8 border border-[var(--pf-border)] px-2 text-[13px]"
+                data-testid="block-time-input"
                 value={blockTimeText}
                 onChange={(e) => {
                   setBlockTimeText(e.target.value);
@@ -541,6 +542,7 @@ export function AppointmentModal() {
               ) : null}
             </label>
             <Input
+              id="block-duration"
               label="Duration"
               requiredMark
               type="number"
@@ -549,6 +551,7 @@ export function AppointmentModal() {
             />
           </div>
           <Select
+            id="block-reason"
             label="Reason"
             requiredMark
             placeholder="Select..."

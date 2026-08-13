@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/store/ui-store";
+import { usePracticeStore } from "@/store/practice-store";
 import { useUsersStore, userDisplayName } from "@/store/users-store";
 
 type SubTab = {
@@ -209,6 +210,7 @@ export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const showToast = useUiStore((s) => s.showToast);
+  const practiceName = usePracticeStore((s) => s.practice.practiceName);
   const practiceInfoTabOpen = useUiStore((s) => s.practiceInfoTabOpen);
   const closePracticeInfoTab = useUiStore((s) => s.closePracticeInfoTab);
   const usersTabOpen = useUiStore((s) => s.usersTabOpen);
@@ -275,7 +277,7 @@ export function TopNav() {
         </div>
 
         <span className={cn(navButtonClass, "cursor-default hover:text-[#cccccc]")}>
-          suman Ma | suman Ma Practice
+          suman Ma | {practiceName}
         </span>
 
         <button
