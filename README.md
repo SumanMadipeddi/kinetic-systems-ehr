@@ -115,6 +115,8 @@ npm run check         # typecheck + lint + unit + build
 - Follow-Up type filter hides/restores a seeded entry
 - Practice Info edit → Home card updates → survives reload
 - Block time create → visible → survives reload
+- Provider All off → empty state; Just me restores provider
+- Lock → unlock with demo password → Log out → login → Home
 
 ## Intentional Tradeoffs
 
@@ -125,6 +127,17 @@ npm run check         # typecheck + lint + unit + build
 - Block **range** UI is present; save is implemented for With patient + Block time
 - Calendar demo date is fixed to `2026-08-12` so seed data and e2e stay deterministic
 - Focus on frontend fidelity and realistic core journeys over breadth
+
+## Demo session shell
+
+Lock / Unlock and Login / Logout are **client-only** interactions (sessionStorage). They intentionally do not represent production authentication.
+
+After Log out, sign back in with:
+
+- Email: `suman@example.com`
+- Password: `password@128`
+
+Fresh visits open the EHR without requiring login.
 
 ## Data / Privacy
 

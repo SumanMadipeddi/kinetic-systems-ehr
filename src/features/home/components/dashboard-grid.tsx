@@ -3,7 +3,7 @@
 import { DASHBOARD_ITEMS } from "../data/dashboard-items";
 import { useSetupProgress } from "../hooks/use-setup-progress";
 import { DashboardCard } from "./dashboard-card";
-import { PracticeInfoCard } from "./practice-info-card";
+import { PracticeInfoCard } from "@/features/home/components/practice-info-card";
 
 export function DashboardGrid() {
   const { usersComplete } = useSetupProgress();

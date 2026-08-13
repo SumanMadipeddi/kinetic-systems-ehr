@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/cn";
 import { useUiStore } from "@/store/ui-store";
 import { usePracticeStore } from "@/store/practice-store";
+import { useDemoSessionStore } from "@/store/demo-session-store";
 import { useUsersStore, userDisplayName } from "@/store/users-store";
 
 type SubTab = {
@@ -211,6 +212,8 @@ export function TopNav() {
   const router = useRouter();
   const showToast = useUiStore((s) => s.showToast);
   const practiceName = usePracticeStore((s) => s.practice.practiceName);
+  const lockSession = useDemoSessionStore((s) => s.lock);
+  const signOut = useDemoSessionStore((s) => s.signOut);
   const practiceInfoTabOpen = useUiStore((s) => s.practiceInfoTabOpen);
   const closePracticeInfoTab = useUiStore((s) => s.closePracticeInfoTab);
   const usersTabOpen = useUiStore((s) => s.usersTabOpen);
@@ -283,7 +286,11 @@ export function TopNav() {
         <button
           type="button"
           className={cn(navButtonClass, "nav-lock")}
-          onClick={() => showToast("Session locked.", "info")}
+          data-testid="nav-lock"
+          onClick={() => {
+            lockSession(pathname || "/home");
+            router.push("/lock");
+          }}
         >
           <Lock size={13} />
           Lock
@@ -303,7 +310,11 @@ export function TopNav() {
         <button
           type="button"
           className={cn(navButtonClass, "nav-logout border-r")}
-          onClick={() => showToast("You have been signed out.", "info")}
+          data-testid="nav-logout"
+          onClick={() => {
+            signOut();
+            router.push("/login");
+          }}
         >
           <LogOut size={13} />
           Log out

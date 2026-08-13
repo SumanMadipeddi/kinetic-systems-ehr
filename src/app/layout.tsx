@@ -11,6 +11,9 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   title: "Practice Fusion EHR",
   description: "Practice Fusion EHR frontend clone",
+  icons: {
+    icon: [{ url: "/favicon.ico", sizes: "any" }],
+  },
 };
 
 export default function RootLayout({

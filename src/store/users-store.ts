@@ -94,7 +94,7 @@ export const useUsersStore = create<UsersState>()(
           isDr: false,
           firstName: "suman",
           lastName: "Ma",
-          email: "suman.ma@example.com",
+          email: "suman@example.com",
           accessLevel: "4",
           isAdmin: true,
           emergencyAccess: false,

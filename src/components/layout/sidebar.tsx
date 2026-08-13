@@ -100,19 +100,14 @@ export function Sidebar() {
       aria-label="Primary"
     >
       <div className="flex h-[95px] w-full shrink-0 flex-col items-center justify-center px-1">
-        <svg
-          width="34"
-          height="34"
-          viewBox="0 0 48 48"
-          aria-hidden
-          className="mb-1"
-        >
-          <path d="M18 4h12l4 10-10 6-10-6 4-10Z" fill="#5eb8e8" />
-          <path d="M34 18 44 22v12l-10 4-6-10 6-10Z" fill="#14a4ec" />
-          <path d="M30 34l-6 10H12l-4-10 10-6 12 6Z" fill="#0d7fb8" />
-          <path d="M14 30 4 26V14l10-4 6 10-6 10Z" fill="#2bb0f0" />
-          <path d="M18 14h12l6 10-6 10H18l-6-10 6-10Z" fill="#8fd4f5" opacity="0.35" />
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/favicon.ico"
+          alt=""
+          width={34}
+          height={34}
+          className="mb-1 h-[34px] w-[34px] object-contain"
+        />
         <div className="text-center text-[13px] font-normal leading-[1.15] text-[var(--pf-primary)]">
           practice
           <br />
